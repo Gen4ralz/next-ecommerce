@@ -18,3 +18,17 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.card {
+  @apply mb-5 block rounded-lg;
+}
+
+.primary-button {
+  @apply rounded-lg bg-emerald-500 py-2 px-4 shadow outline-none hover:bg-emerald-700 text-white;
+}
+
+input,
+select,
+textarea {
+  @apply mb-4 rounded border p-2 outline-none ring-blue-500 focus:ring;
+}

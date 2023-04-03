@@ -1,0 +1,75 @@
+const data = {
+  products: [
+    {
+      name: 'Nina Sets',
+      slug: 'nina-sets',
+      category: 'Sets',
+      image: '/images/nina-bn.jpg',
+      images: [
+        '/images/nina-bn.jpg',
+        '/images/nina-cm.jpg',
+        '/images/nina-gn.jpg',
+        '/images/nina-pk.jpg',
+      ],
+      colors: [
+        {
+          name: 'Brick',
+          class: '#A0522D',
+          sizes: [{ name: 'Freesize', stock: 5 }],
+          sku: 'nina-bn',
+        },
+        {
+          name: 'Cream',
+          class: '#FFF5EE',
+          sizes: [{ name: 'Freesize', stock: 2 }],
+          sku: 'nina-cm',
+        },
+        {
+          name: 'Olive',
+          class: '#556B2F',
+          sizes: [{ name: 'Freesize', stock: 0 }],
+          sku: 'nina-gn',
+        },
+        {
+          name: 'Pink',
+          class: '#DDA0DD',
+          sizes: [{ name: 'Freesize', stock: 5 }],
+          sku: 'nina-pk',
+        },
+      ],
+      price: 590,
+      brand: 'Glamclothes',
+      rating: 4.6,
+      numReviews: 8,
+      description: 'A popular shirt',
+    },
+    {
+      name: 'Sundae Sets',
+      slug: 'sundae-sets',
+      category: 'Sets',
+      image: '/images/sundae-cf.jpg',
+      sizes: ['S', 'M', 'L'],
+      price: 590,
+      brand: 'Glamclothes',
+      rating: 4.6,
+      numReviews: 5,
+      countInStock: 0,
+      description: 'A popular sets',
+    },
+    {
+      name: 'Tweed Look Sets',
+      slug: 'tweed-look-sets',
+      category: 'Sets',
+      image: '/images/tweed-wh.jpg',
+      sizes: ['Freesize'],
+      price: 590,
+      brand: 'Glamclothes',
+      rating: 4.4,
+      numReviews: 8,
+      countInStock: 20,
+      description: 'A popular sets',
+    },
+  ],
+}
+
+export default data
