@@ -1,13 +1,11 @@
-import Image from 'next/image'
+/* eslint-disable @next/next/no-img-element */
+import { XMarkIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import React, { useContext } from 'react'
-import { XCircleIcon } from '@heroicons/react/24/solid'
 import Layout from '../components/Layout'
 import { Store } from '../utils/Store'
-import { useRouter } from 'next/router'
 
 export default function CartScreen() {
-  const router = useRouter()
   const { state, dispatch } = useContext(Store)
   const {
     cart: { cartItems },
@@ -16,75 +14,75 @@ export default function CartScreen() {
     dispatch({ type: 'CART_REMOVE_ITEM', payload: item })
   }
   return (
-    <Layout title="Shopping Cart">
-      <h1 className="mb-4 text-xl">Shopping Cart</h1>
-      {cartItems.length === 0 ? (
-        <div>
-          Cart is empty. <Link href="/">Go shopping</Link>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-4 md:gap-5">
-          <div className="overflow-x-auto md:col-span-3">
-            <table className="min-w-full ">
-              <thead className="border-b">
-                <tr>
-                  <th className="p-5 text-left">Item</th>
-                  <th className="p-5 text-right">Quantity</th>
-                  <th className="p-5 text-right">Price</th>
-                  <th className="p-5">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map((item) => (
-                  <tr key={item.color.sku} className="border-b">
-                    <td>
-                      <Link href={`/product/${item.product.slug}`}>
-                        <Image
-                          src={item.product.image}
-                          alt={item.product.name}
-                          className="w-auto h-auto"
-                          width={50}
-                          height={50}></Image>
-                        &nbsp;
-                        {item.product.name}
-                      </Link>
-                    </td>
-                    <td className="p-5 text-right">{item.quantity}</td>
-                    <td className="p-5 text-right">${item.product.price}</td>
-                    <td className="p-5 text-center">
-                      <button onClick={() => removeItemHandler(item)}>
-                        <XCircleIcon className="h-5 w-5"></XCircleIcon>
+    <Layout title="Cart">
+      <h1 className="text-2xl font-bold px-2 py-4">CART</h1>
+
+      <div className="mt-2 mx-2">
+        <div className="flow-root">
+          <ul role="list" className="-my-6 divide-y divide-gray-200 mb-2">
+            {cartItems.map((item) => (
+              <li key={item.sku} className="flex py-6">
+                <div className="w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                  <Link href={`/product/${item.product.slug}`}>
+                    <img
+                      src={item.color.image}
+                      alt={item.color.name}
+                      className="h-full w-full object-cover object-center"
+                    />
+                  </Link>
+                </div>
+                <div className="ml-4 flex flex-1 flex-col">
+                  <div>
+                    <div className="flex justify-between text-base font-medium text-gray-900">
+                      <p>{item.product.name}</p>
+                      <p>{item.product.price} ฿</p>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {item.color.name} &nbsp;|&nbsp; {item.size.name}
+                    </p>
+                  </div>
+                  <div className="flex flex-1 items-end justify-between text-sm">
+                    <p className="text-gray-500">Qty {item.quantity}</p>
+                    <div className="flex">
+                      <button
+                        type="button"
+                        className="font-medium text-rose-500"
+                        onClick={() => removeItemHandler(item)}>
+                        <XMarkIcon className="w-5 h-5" />
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="card p-5 mt-10">
-            <ul>
-              <li>
-                <div className="pb-3 text-xl">
-                  ทั้งหมด ({cartItems.reduce((a, c) => a + c.quantity, 0)} ชิ้น)
-                  :{' '}
-                  {cartItems.reduce(
-                    (a, c) => a + c.quantity * c.product.price,
-                    0
-                  )}{' '}
-                  บาท
+                    </div>
+                  </div>
                 </div>
               </li>
-              <li>
-                <button
-                  onClick={() => router.push('/shipping')}
-                  className="primary-button w-full">
-                  Check Out
-                </button>
-              </li>
-            </ul>
-          </div>
+            ))}
+          </ul>
         </div>
-      )}
+      </div>
+      <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
+        <div className="flex justify-between text-base font-medium text-gray-900">
+          <p>
+            Subtotal: ({cartItems.reduce((a, c) => a + c.quantity, 0)} pcs.)
+          </p>
+          <p className="font-bold text-xl text-emerald-500">
+            {cartItems.reduce((a, c) => a + c.quantity * c.product.price, 0)} ฿
+          </p>
+        </div>
+        <div className="mt-6">
+          <Link
+            href="#"
+            className="flex items-center justify-center rounded-md border border-transparent bg-black px-6 py-3 text-base font-medium text-white shadow-sm">
+            Checkout
+          </Link>
+        </div>
+        <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
+          <p>
+            or{' '}
+            <Link href="/" className="font-medium text-indigo-600">
+              Continue Shopping<span aria-hidden="true"> &rarr;</span>
+            </Link>
+          </p>
+        </div>
+      </div>
     </Layout>
   )
 }

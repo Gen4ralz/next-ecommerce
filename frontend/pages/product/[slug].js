@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Store } from '../../utils/Store'
 import { ChevronLeftIcon, StarIcon } from '@heroicons/react/24/solid'
 import { RadioGroup } from '@headlessui/react'
+import Carousel from '../../components/Carousel'
 
 export default function ProductScreen() {
   const router = useRouter()
@@ -74,19 +75,51 @@ export default function ProductScreen() {
   return (
     <Layout title={product.name}>
       {/* Image gallery */}
-      <div className="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-2">
+      <div className="hidden mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
+        <div className="aspect-h-4 aspect-w-3 hidden overflow-hidden rounded-lg lg:block">
+          <img
+            src={product.images[0].src}
+            alt={product.images[0].alt}
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+        <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
+          <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
+            <img
+              src={product.images[1].src}
+              alt={product.images[1].alt}
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
+          <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
+            <img
+              src={product.images[2].src}
+              alt={product.images[2].alt}
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
+        </div>
         <div className="aspect-h-5 aspect-w-4 lg:aspect-h-4 lg:aspect-w-3 sm:overflow-hidden sm:rounded-lg">
           <img
-            src={product.images[0]}
-            alt="cover"
+            src={product.images[3].src}
+            alt={product.images[3].alt}
             className="w-full h-full object-cover object-center"
           />
           <Link
             href="/"
-            className="text-white rounded-full left-[5%] text-2xl absolute top-[15%] p-4 bg-black/20 md:hidden">
+            className="text-white rounded-full left-[5%] text-2xl absolute top-[20%] p-4 bg-black/20 md:hidden">
             <ChevronLeftIcon className="w-8 h-8" />
           </Link>
         </div>
+      </div>
+
+      {/* Mobile image*/}
+      <div className="sm:hidden">
+        <Carousel autoSlide={true} autoSlideInterval={5000}>
+          {product.images.map((image) => (
+            <img src={image.src} key={image.alt} alt={image.alt} />
+          ))}
+        </Carousel>
       </div>
 
       {/* Product info */}
@@ -101,7 +134,7 @@ export default function ProductScreen() {
         <div className="mt-4 lg:row-span-3 lg:mt-0">
           <h2 className="sr-only">Product Information</h2>
           <p className="text-3xl tracking-tight text-gray-900">
-            {product.price}
+            {product.price} ฿
           </p>
           <div className="mt-6">
             <h3 className="sr-only">Reviews</h3>
@@ -129,7 +162,7 @@ export default function ProductScreen() {
             </div>
           </div>
           <div className="mt-10">
-            <h3 className="text-sm font-medium text-gray-900">สี - Color</h3>
+            <h3 className="font-medium text-gray-900">สี - Color</h3>
             <RadioGroup
               value={selectedColor}
               onChange={handleColorSelect}
@@ -165,7 +198,7 @@ export default function ProductScreen() {
           </div>
           <div className="mt-10">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-900">ขนาด - Size</h3>
+              <h3 className="font-medium text-gray-900">ขนาด - Size</h3>
             </div>
             {selectedColor && (
               <RadioGroup
@@ -240,17 +273,104 @@ export default function ProductScreen() {
             }
             className={
               selectedSize
-                ? 'mt-10 flex w-full items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 bg-indigo-500'
+                ? 'mt-10 flex w-full items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 bg-black'
                 : 'mt-10 flex w-full items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium text-white bg-gray-400 cursor-not-allowed'
             }>
             Add to cart
           </button>
         </div>
         <div className="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-gray-200 lg:pb-16 lg:pr-8 lg:pt-6">
-          <div>
+          <div className="border-t border-gray-200">
             <h3 className="sr-only">Description</h3>
-            <div className="space-y-6">
-              <p>{product.description}</p>
+            <div className="card border border-gray-500 mt-4 shadow-sm bg-gray-50">
+              <h3 className="text-gray-900 font-bold px-4 pt-4  rounded-lg">
+                รายละเอียด - Description
+              </h3>
+              <p className="py-4 px-4 text-sm">{product.description}</p>
+            </div>
+
+            <div className="px-4 pt-4 bg-gray-50 card border border-gray-500">
+              <h3 className="text-gray-900 font-bold">ขนาดชุด - Size Detail</h3>
+              <div>
+                <p className="pt-4 px-4 font-bold">เสื้อ (Top)</p>
+                <div className="flex">
+                  <div className="w-3/5 text-right">
+                    <span className="text-sm  py-2 px-4">อก (Bust)</span>
+                  </div>
+                  <div className="w-2/4 text-center mb-4">
+                    <span className="text-sm  py-2 px-4">
+                      {product.details[0].bust}
+                      {'"'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex">
+                  <div className="w-3/5 text-right">
+                    <span className="text-sm  py-2 px-4">ยาว (Length)</span>
+                  </div>
+                  <div className="w-2/4 text-center mb-4">
+                    <span className="text-sm  py-2 px-4">
+                      {product.details[0].length}
+                      {'"'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="pt-4 px-4 font-bold">กางเกง (Pants)</p>
+                <div className="flex">
+                  <div className="w-3/5 text-right">
+                    <span className="text-sm  py-2 px-4">เอว (Waise)</span>
+                  </div>
+                  <div className="w-2/4 text-center mb-4">
+                    <span className="text-sm  py-2 px-4">
+                      {product.details[1].waise}
+                      {'"'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex">
+                  <div className="w-3/5 text-right">
+                    <span className="text-sm  py-2 px-4">ยาว (Length)</span>
+                  </div>
+                  <div className="w-2/4 text-center mb-4">
+                    <span className="text-sm  py-2 px-4">
+                      {product.details[1].hip}
+                      {'"'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex">
+                  <div className="w-3/5 text-right">
+                    <span className="text-sm  py-2 px-4">ยาว (Length)</span>
+                  </div>
+                  <div className="w-2/4 text-center mb-4">
+                    <span className="text-sm  py-2 px-4">
+                      {product.details[1].length}
+                      {'"'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card border border-gray-500 my-4 shadow-sm bg-gray-50">
+              <h3 className="text-gray-900 font-bold px-4 py-4 rounded-lg">
+                ข้อมูลนางแบบ - Model
+              </h3>
+              <p className="px-8">ความสูง: {product.models[0].height}</p>
+              <p className="px-8">
+                รอบอก / เอว / สะโพก: {product.models[1].size}
+              </p>
+              <p className="px-8 mb-4">{product.models[2].wear}</p>
+            </div>
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="card border border-gray-500 mt-4 shadow-sm bg-indigo-50">
+              <h3 className="text-gray-900 font-bold px-4 pt-4  rounded-lg">
+                รีวิว - Reviews
+              </h3>
+              <p className="py-4 px-4 text-sm">{product.description}</p>
             </div>
           </div>
         </div>

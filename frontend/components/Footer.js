@@ -18,8 +18,10 @@ export default function Footer() {
       <Link
         href="/"
         className={
-          (path === '/' ? 'text-emerald-600' : '') +
-          ' sm:block w-16 h-16 rounded-lg bg-white border border-gray-200 flex flex-col justify-center items-center'
+          (path === '/'
+            ? 'text-sky-700 border-sky-500 bg-sky-50'
+            : 'border-gray-200') +
+          ' w-16 h-16 rounded-lg bg-white border flex flex-col justify-center items-center'
         }>
         <HomeIcon className="w-6 h-6" />
         <span className="text-xs mt-2">Home</span>
@@ -27,10 +29,12 @@ export default function Footer() {
       <Link
         href="/cart"
         className={
-          (path === '/cart' ? 'text-emerald-600' : '') +
-          ' sm:block w-16 h-16 rounded-lg bg-white border border-gray-200 flex flex-col justify-center items-center'
+          (path === '/cart'
+            ? 'text-sky-700 border-sky-500 bg-sky-50'
+            : 'border-gray-200') +
+          ' w-16 h-16 rounded-lg bg-white border border-gray-200 flex flex-col justify-center items-center'
         }>
-        <ShoppingBagIcon className="w-6 h-6"></ShoppingBagIcon>
+        <ShoppingBagIcon className="w-6 h-6 text-center"></ShoppingBagIcon>
         <span className="mt-2 text-xs">
           Cart{' '}
           {cart.cartItems.length > 0 && (
@@ -40,11 +44,14 @@ export default function Footer() {
           )}
         </span>
       </Link>
+
       <Link
         href="/login"
         className={
-          (path === '/login' ? 'text-emerald-600' : '') +
-          ' sm:block w-16 h-16 rounded-lg bg-white border border-gray-200 flex flex-col justify-center items-center'
+          (path === '/login'
+            ? 'text-sky-700 border-sky-500 bg-sky-50'
+            : 'border-gray-200') +
+          ' w-16 h-16 rounded-lg bg-white border border-gray-200 flex flex-col justify-center items-center'
         }>
         <UserIcon className="w-6 h-6" />
         <span className="mt-2 text-xs">User</span>

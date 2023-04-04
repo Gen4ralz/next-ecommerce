@@ -24,7 +24,7 @@ a {
 }
 
 .primary-button {
-  @apply rounded-lg bg-emerald-500 py-2 px-4 shadow outline-none hover:bg-emerald-700 text-white;
+  @apply rounded-lg bg-black py-2 px-4 shadow outline-none hover:bg-emerald-700 text-white;
 }
 
 input,

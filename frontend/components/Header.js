@@ -2,7 +2,7 @@ import { ShoppingBagIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import { Store } from '../utils/Store'
 
 export default function Header() {
@@ -12,9 +12,15 @@ export default function Header() {
   const path = router.pathname
   // const [phrase, setPhrase] = useState(initialState:'')
   return (
-    <div className="bg-white shadow-sm sticky top-0 z-50">
+    <div
+      className={
+        (path.match(/^\/product\/.*/) ? 'hidden' : '') ||
+        (path === '/login' ? 'hidden' : '') ||
+        (path === '/cart' ? 'hidden' : '') +
+          ' bg-white shadow-sm sticky top-0 z-50'
+      }>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-4">
-        <div className="flex items-center justify-between mx-2">
+        <div className="flex items-center justify-between sm:mx-2">
           <Link
             href="/"
             className="sm:block sm:font-bold sm:text-gray-700 sm:text-2xl hidden">
@@ -31,10 +37,10 @@ export default function Header() {
             />
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <Link
               href="/cart"
-              className="sm:block w-16 h-12 rounded-lg bg-gray-100 border border-gray-200 flex justify-center items-center px-2">
+              className="w-14 h-12 rounded-lg bg-gray-100 border border-gray-200 flex justify-center items-center">
               <ShoppingBagIcon className="w-6 h-6" />
               {cart.cartItems.length > 0 && (
                 <span className="ml-1 rounded-full bg-rose-500 text-xs font-bold text-white px-1">
@@ -44,7 +50,7 @@ export default function Header() {
             </Link>
             <Link
               href="/login"
-              className="sm:block w-16 h-12 rounded-lg bg-gray-100 border border-gray-200 flex justify-center items-center">
+              className="w-14 h-12 rounded-lg bg-gray-100 border border-gray-200 flex justify-center items-center">
               <Image
                 src="https://avatars.dicebear.com/api/bottts/2.svg"
                 alt="bottts"

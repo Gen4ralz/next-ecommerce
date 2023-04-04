@@ -16,9 +16,9 @@ export default function LoginScreen() {
   return (
     <Layout title="Login">
       <form
-        className="mx-auto max-w-screen-md"
+        className="mx-auto max-w-screen-md px-6"
         onSubmit={handleSubmit(submitHandler)}>
-        <h1 className="mb-4 text-xl font-bold text-center">Login</h1>
+        <h1 className="py-4 text-xl font-bold text-center">Login</h1>
         <div className="mb-4">
           <label htmlFor="email" className="font-bold">
             Email
@@ -59,11 +59,13 @@ export default function LoginScreen() {
           )}
         </div>
         <div className="mb-4">
-          <button className="primary-button">Login</button>
+          <button className="primary-button w-full">Login</button>
         </div>
         <div className="mb-4">
           Don&apos;t have an account? &nbsp;
-          <Link href="register">Register</Link>
+          <Link href="register" className="text-rose-500 font-bold">
+            Register
+          </Link>
         </div>
       </form>
     </Layout>

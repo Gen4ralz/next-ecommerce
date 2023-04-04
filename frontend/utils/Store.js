@@ -33,6 +33,12 @@ function reducer(state, action) {
         return { ...state, cart: { ...state.cart, cartItems } }
       }
     }
+    case 'CART_REMOVE_ITEM': {
+      const cartItems = state.cart.cartItems.filter(
+        (item) => item.sku !== action.payload.sku
+      )
+      return { ...state, cart: { ...state.cart, cartItems } }
+    }
     default:
       return state
   }
