@@ -366,7 +366,7 @@ export default function ProductScreen() {
             </div>
           </div>
           <div className="border-t border-gray-200">
-            <div className="card border border-gray-500 mt-4 shadow-sm bg-indigo-50">
+            <div className="mt-4">
               <h3 className="text-gray-900 font-bold px-4 pt-4  rounded-lg">
                 รีวิว - Reviews
               </h3>
