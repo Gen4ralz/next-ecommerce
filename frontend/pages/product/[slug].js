@@ -80,14 +80,14 @@ export default function ProductScreen(props) {
           />
         </div>
         <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
-          <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
+          <div className="aspect-h-2 aspect-w-2 overflow-hidden rounded-lg">
             <img
               src={product.images[1].src}
               alt={product.images[1].alt}
               className="h-full w-full object-cover object-center"
             />
           </div>
-          <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
+          <div className="aspect-h-2 aspect-w-2 overflow-hidden rounded-lg">
             <img
               src={product.images[2].src}
               alt={product.images[2].alt}
@@ -306,7 +306,7 @@ export default function ProductScreen(props) {
                   </div>
                   <div className="w-2/4 text-center mb-4">
                     <span className="text-sm  py-2 px-4">
-                      {product.details[0].length}
+                      {product.details[0].tlength}
                       {'"'}
                     </span>
                   </div>
@@ -342,7 +342,7 @@ export default function ProductScreen(props) {
                   </div>
                   <div className="w-2/4 text-center mb-4">
                     <span className="text-sm  py-2 px-4">
-                      {product.details[1].length}
+                      {product.details[1].blength}
                       {'"'}
                     </span>
                   </div>
