@@ -2,21 +2,17 @@
 import { useContext, useState } from 'react'
 import Layout from '../../components/Layout'
 import { useRouter } from 'next/router'
-import data from '../../utils/data'
 import Link from 'next/link'
 import { Store } from '../../utils/Store'
 import { ChevronLeftIcon, StarIcon } from '@heroicons/react/24/solid'
 import { RadioGroup } from '@headlessui/react'
 import Carousel from '../../components/Carousel'
 
-export default function ProductScreen() {
+export default function ProductScreen(props) {
   const router = useRouter()
   const { state, dispatch } = useContext(Store)
-  const { query } = useRouter()
-  const { slug } = query
-  const product = data.products.find((x) => x.slug === slug)
-
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0])
+  const { product } = props
+  const [selectedColor, setSelectedColor] = useState(product.colors[0])
   const [selectedSize, setSelectedSize] = useState(null)
 
   const handleColorSelect = (color) => {
@@ -115,7 +111,7 @@ export default function ProductScreen() {
 
       {/* Mobile image*/}
       <div className="sm:hidden">
-        <Carousel autoSlide={true} autoSlideInterval={5000}>
+        <Carousel autoSlide={true} autoSlideInterval={5000} key={product.slug}>
           {product.images.map((image) => (
             <img src={image.src} key={image.alt} alt={image.alt} />
           ))}
@@ -377,4 +373,32 @@ export default function ProductScreen() {
       </div>
     </Layout>
   )
+}
+
+export async function getServerSideProps(context) {
+  const { params } = context
+  const { slug } = params
+  const headers = new Headers()
+  headers.append('Content-Type', 'application/json')
+
+  const requestOptions = {
+    method: 'GET',
+    headers: headers,
+  }
+
+  const response = await fetch(
+    `http://localhost:8080/products/${slug}`,
+    requestOptions
+  )
+  const data = await response.json().catch((err) => {
+    console.log(err)
+  })
+
+  console.log(data)
+
+  return {
+    props: {
+      product: data,
+    },
+  }
 }
