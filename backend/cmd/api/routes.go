@@ -25,6 +25,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Get("/products", app.AllProducts)
 	mux.Get("/products/{slug}", app.ProductBySlug)
+	mux.Get("/products/seed", app.SeedProducts)
 
 	return mux
 }

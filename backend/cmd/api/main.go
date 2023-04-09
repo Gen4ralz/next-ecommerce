@@ -1,6 +1,8 @@
 package main
 
 import (
+	"backend/internal/repository"
+	"backend/internal/repository/dbrepo"
 	"context"
 	"fmt"
 	"log"
@@ -8,7 +10,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const port = 8080
@@ -16,7 +17,7 @@ const port = 8080
 type application struct {
 	DSN string
 	Domain string
-	DB *mongo.Database
+	DB repository.DatabaseRepo
 }
 
 func main() {
@@ -36,9 +37,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	app.DB = conn
+	app.DB = &dbrepo.MongoDBRepo{DB: conn}
 	defer func() {
-		if err = conn.Client().Disconnect(context.Background()); err != nil {
+		if err = conn.Client().Disconnect(context.TODO()); err != nil {
 			log.Fatal(err)
 		}
 	}()
