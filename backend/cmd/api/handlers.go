@@ -3,6 +3,7 @@ package main
 import (
 	"backend/internal/models"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -120,4 +121,32 @@ func (app *application) ProductBySlug(res http.ResponseWriter, req *http.Request
 	}
     
    _ = app.writeJSON(res, http.StatusOK, product)
+}
+
+func (app *application) authenticate(res http.ResponseWriter, req *http.Request) {
+	// read json payload
+
+	// validate user against database
+
+	// check password
+
+	// create a JWT user
+	u := jwtUser{
+		ID: 1,
+		FirstName: "Admin",
+		LastName: "User",
+	}
+
+	// generate tokens
+	tokens, err := app.auth.GenerateTokenPair(&u)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+	log.Println(tokens.Token)
+	refreshCookie := app.auth.GetRefreshCookie(tokens.RefreshToken)
+	http.SetCookie(res, refreshCookie)
+
+	res.Write([]byte(tokens.Token))
 }

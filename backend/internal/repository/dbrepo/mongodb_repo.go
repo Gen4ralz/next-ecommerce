@@ -80,7 +80,7 @@ func (m *MongoDBRepo) InsertProduct(product models.Product) (error){
         "price":       product.Price,
         "brand":       product.Brand,
         "rating":      product.Rating,
-        "num_reviews": product.NumReviews,
+        "numReviews": product.NumReviews,
         "description": product.Description,
         "details":     product.Details,
         "models":      product.Models,

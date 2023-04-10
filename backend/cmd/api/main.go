@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -15,9 +16,14 @@ import (
 const port = 8080
 
 type application struct {
-	DSN string
-	Domain string
-	DB repository.DatabaseRepo
+	DSN 			string
+	Domain 			string
+	DB 				repository.DatabaseRepo
+	auth 			Auth
+	JWTSecret 		string
+	JWTIssuer 		string
+	JWTAudience 	string
+	CookieDomain	string
 }
 
 func main() {
@@ -31,6 +37,11 @@ func main() {
 
     // Get the value of the DSN environment variable
     app.DSN = os.Getenv("DSN")
+	app.JWTSecret = os.Getenv("JWT_SECRET")
+	app.JWTIssuer = os.Getenv("JWT_ISSUER")
+	app.JWTAudience = os.Getenv("JWT_AUDIENCE")
+	app.CookieDomain = os.Getenv("COOKIE_DOMAIN")
+	app.Domain = os.Getenv("DOMAIN")
 
 	// connect to the database
 	conn, err := app.connectToDB()
@@ -43,6 +54,17 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
+	app.auth = Auth{
+		Issuer: app.JWTIssuer,
+		Audience: app.JWTAudience,
+		Secret: app.JWTSecret,
+		TokenExpiry: time.Minute * 10,
+		RefreshExpiry: time.Hour *24,
+		CookiePath: "/",
+		CookieName: "Host-refresh_token",
+		CookieDomain: app.CookieDomain,
+	}
 
 	log.Println("Starting application on port", port)
 
