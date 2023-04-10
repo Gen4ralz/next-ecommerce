@@ -2,7 +2,6 @@ package main
 
 import (
 	"backend/internal/models"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -21,13 +20,7 @@ func (app *application) Home(res http.ResponseWriter, req *http.Request) {
 		Version: "1.0.0",
 	}
 
-	out, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println(err)
-	}
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
-	res.Write(out)
+	_ = app.writeJSON(res, http.StatusOK, payload)
 }
 
 func (app *application) SeedProducts(res http.ResponseWriter, req *http.Request) {
@@ -92,16 +85,17 @@ func (app *application) SeedProducts(res http.ResponseWriter, req *http.Request)
 
 	err := app.DB.DeleteAllProducts()
 	if err != nil {
-		fmt.Println(err)
+		app.errorJSON(res, err)
+		return
 	}
 
 	err = app.DB.InsertProduct(nina)
 	if err != nil {
-		fmt.Println(err)
+		app.errorJSON(res, err)
+		return
 	}
     //Return success response
-    res.WriteHeader(http.StatusCreated)
-    fmt.Fprintf(res, "Product created successfully")
+    _ = app.writeJSON(res, http.StatusCreated, nil)
 }
 
 func (app *application) AllProducts(res http.ResponseWriter, req *http.Request) {
@@ -112,15 +106,7 @@ func (app *application) AllProducts(res http.ResponseWriter, req *http.Request) 
 		fmt.Println(err)
 	}
 
-
-	out, err := json.Marshal(products)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
-	res.Write(out)
+	_ = app.writeJSON(res, http.StatusOK, products)
 }
 
 func (app *application) ProductBySlug(res http.ResponseWriter, req *http.Request) {
@@ -129,16 +115,9 @@ func (app *application) ProductBySlug(res http.ResponseWriter, req *http.Request
 
 	product, err := app.DB.ProductBySlug(slug)
 	if err != nil {
-		fmt.Println(err)
+		app.errorJSON(res, err)
 		return
 	}
     
-    // Marshal the product data as JSON and send it in the response
-	out, err := json.Marshal(product)
-	if err != nil {
-		fmt.Println(err)
-	}
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
-	res.Write(out)
+   _ = app.writeJSON(res, http.StatusOK, product)
 }
