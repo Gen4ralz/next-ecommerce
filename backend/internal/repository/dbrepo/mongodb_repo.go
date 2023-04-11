@@ -3,6 +3,7 @@ package dbrepo
 import (
 	"backend/internal/models"
 	"context"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,7 +51,7 @@ func (m *MongoDBRepo) AllProducts() ([]*models.Product, error){
 	return products, nil
 }
 
-func (m *MongoDBRepo) ProductBySlug(slug string)(*models.Product,error){
+func (m *MongoDBRepo) ProductBySlug(slug string)(*models.Product,error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
 	defer cancel()
 
@@ -65,7 +66,7 @@ func (m *MongoDBRepo) ProductBySlug(slug string)(*models.Product,error){
 	return &product, nil
 }
 
-func (m *MongoDBRepo) InsertProduct(product models.Product) (error){
+func (m *MongoDBRepo) InsertProduct(product models.Product) (error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
 	defer cancel()
 
@@ -93,7 +94,23 @@ func (m *MongoDBRepo) InsertProduct(product models.Product) (error){
 	return nil
 }
 
-func (m *MongoDBRepo) DeleteAllProducts()(error){
+func (m *MongoDBRepo) InsertManyUser(users []models.User) (error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	collection := m.DB.Collection("users")
+	var docs []interface{}
+	for _, user := range users {
+		docs = append(docs, user)
+	}
+	_, err := collection.InsertMany(ctx, docs)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MongoDBRepo) DeleteAllProducts()(error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
 	defer cancel()
 
@@ -102,4 +119,33 @@ func (m *MongoDBRepo) DeleteAllProducts()(error){
 		return err
 	}
 	return nil
+}
+
+func (m *MongoDBRepo) DeleteAllUsers()(error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	_, err := m.DB.Collection("users").DeleteMany(ctx, bson.M{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MongoDBRepo) GetUserByEmail(email string)(*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	var user models.User
+
+	collection := m.DB.Client().Database("next-ecommerce").Collection("users")
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user not found for email %s", email)
+		}
+		return nil, err
+	}
+
+	return &user, nil
 }

@@ -2,12 +2,14 @@ package main
 
 import (
 	"backend/internal/models"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) Home(res http.ResponseWriter, req *http.Request) {
@@ -22,6 +24,50 @@ func (app *application) Home(res http.ResponseWriter, req *http.Request) {
 	}
 
 	_ = app.writeJSON(res, http.StatusOK, payload)
+}
+
+func (app *application) SeedUsers(res http.ResponseWriter, req *http.Request) {
+	var users []models.User
+
+	u1 := models.User{
+		IsAdmin: true,
+		Email: "admin@example.com",
+		Password: "admin123",
+		FirstName: "John",
+		LastName: "Smith",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(u1.Password), 12)
+	u1.Password = string(hashedPassword)
+	users = append(users, u1)
+
+	u2 := models.User{
+		IsAdmin: false,
+		Email: "user@example.com",
+		Password: "user123",
+		FirstName: "Chalita",
+		LastName: "Yooth",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte(u2.Password), 12)
+	u2.Password = string(hashedPassword)
+	users = append(users, u2)
+
+	err := app.DB.DeleteAllUsers()
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+	err = app.DB.InsertManyUser(users)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+    //Return success response
+    _ = app.writeJSON(res, http.StatusCreated, nil)
 }
 
 func (app *application) SeedProducts(res http.ResponseWriter, req *http.Request) {
@@ -124,17 +170,38 @@ func (app *application) ProductBySlug(res http.ResponseWriter, req *http.Request
 }
 
 func (app *application) authenticate(res http.ResponseWriter, req *http.Request) {
+
 	// read json payload
+	var requestPayload struct {
+		Email string	`json:"email" bson:"email"`
+		Password string	`json:"password" bson:"password"`
+	}
+
+	err := app.readJSON(res, req, &requestPayload)
+	if err != nil {
+		app.errorJSON(res, err, http.StatusBadRequest)
+		return
+	}
 
 	// validate user against database
+	user, err := app.DB.GetUserByEmail(requestPayload.Email)
+	if err != nil {
+		app.errorJSON(res, errors.New("invalid credentials"), http.StatusBadRequest)
+		return
+	}
 
 	// check password
+	valid, err := user.PasswordMatches(requestPayload.Password)
+	if err != nil || !valid {
+		app.errorJSON(res, errors.New("invalid credentials"), http.StatusBadRequest)
+		return
+	}
 
 	// create a JWT user
 	u := jwtUser{
-		ID: 1,
-		FirstName: "Admin",
-		LastName: "User",
+		ID: user.ID.Hex(),
+		FirstName: user.FirstName,
+		LastName: user.LastName,
 	}
 
 	// generate tokens
@@ -148,5 +215,5 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 	refreshCookie := app.auth.GetRefreshCookie(tokens.RefreshToken)
 	http.SetCookie(res, refreshCookie)
 
-	res.Write([]byte(tokens.Token))
+	app.writeJSON(res, http.StatusAccepted, tokens)
 }

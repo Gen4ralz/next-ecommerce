@@ -12,4 +12,7 @@ type DatabaseRepo interface {
 	InsertProduct(product models.Product) (error)
 	DeleteAllProducts()(error)
 	ProductBySlug(slug string)(*models.Product,error)
+	GetUserByEmail(email string)(*models.User, error)
+	InsertManyUser(users []models.User) (error)
+	DeleteAllUsers()(error)
 }

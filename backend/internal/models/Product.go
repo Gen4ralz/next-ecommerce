@@ -16,8 +16,8 @@ type Product struct {
     Description string      `json:"description" bson:"description"`
     Details     []Detail    `json:"details" bson:"details"`
     Models      []Model     `json:"models" bson:"models"`
-	CreatedAt	time.Time	`json:"-" bson:"-"`
-	UpdatedAt	time.Time	`json:"_" bson:"_"` 
+	CreatedAt	time.Time	`json:"created_at" bson:"-"`
+	UpdatedAt	time.Time	`json:"updated_at" bson:"_"` 
 }
 
 type Image struct {

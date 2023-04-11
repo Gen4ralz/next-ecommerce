@@ -23,11 +23,12 @@ func (app *application) routes() http.Handler {
 
 	mux.Get("/", app.Home)
 
-	mux.Get("/authenticate", app.authenticate)
+	mux.Post("/authenticate", app.authenticate)
 
 	mux.Get("/products", app.AllProducts)
 	mux.Get("/products/{slug}", app.ProductBySlug)
 	mux.Get("/products/seed", app.SeedProducts)
+	mux.Get("/users/seed", app.SeedUsers)
 
 	return mux
 }

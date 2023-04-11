@@ -1,9 +1,15 @@
 import { createContext, useReducer } from 'react'
+import Cookies from 'js-cookie'
 
 export const Store = createContext()
 
 const initialState = {
-  cart: { cartItems: [] },
+  cart: {
+    cartItems: Cookies.get('cartItems')
+      ? JSON.parse(Cookies.get('cartItems'))
+      : [],
+  },
+  userInfo: Cookies.get('user-Info') ? JSON.parse(Cookies.get('userInfo')) : [],
 }
 
 function reducer(state, action) {
@@ -39,6 +45,8 @@ function reducer(state, action) {
       )
       return { ...state, cart: { ...state.cart, cartItems } }
     }
+    case 'USER_LOGIN':
+      return { ...state, userInfo: action.payload }
     default:
       return state
   }

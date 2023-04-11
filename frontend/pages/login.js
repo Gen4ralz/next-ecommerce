@@ -1,18 +1,63 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { useContext } from 'react'
 import Layout from '../components/Layout'
 import { useForm } from 'react-hook-form'
+import { getError } from '../utils/error'
+import { toast } from 'react-toastify'
+import { useRouter } from 'next/router'
+import { Store } from '../utils/Store'
+import Cookies from 'js-cookie'
 
 export default function LoginScreen() {
+  const router = useRouter()
+  const { redirect } = router.query // login?redirect=/shipping
+  const { state, dispatch } = useContext(Store)
+  const { userInfo } = state
+  if (userInfo) {
+    router.push('/')
+  }
+
   const {
     handleSubmit,
     register,
     formState: { errors },
   } = useForm()
 
-  const submitHandler = ({ email, password }) => {
-    console.log(email, password)
+  const submitHandler = async ({ email, password }) => {
+    // build the request payload
+    let payload = {
+      email: email,
+      password: password,
+    }
+
+    try {
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      }
+
+      const response = await fetch(`/authenticate`, requestOptions)
+      const data = await response.json()
+
+      if (data.error) {
+        // handle error
+        toast.error(data.error)
+      } else {
+        // handle success
+        dispatch({ type: 'USER_LOGIN', payload: data })
+        Cookies.set('userInfo', JSON.stringify(data))
+        router.push(redirect || '/')
+      }
+    } catch (err) {
+      // handle network error
+      toast.error(getError(err))
+    }
   }
+
   return (
     <Layout title="Login">
       <form

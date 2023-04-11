@@ -20,7 +20,7 @@ type Auth struct {
 }
 
 type jwtUser struct {
-	ID				int		`json:"id" bson:"id"`
+	ID				string	`json:"id" bson:"id"`
 	FirstName		string	`json:"first_name" bson:"first_name"`
 	LastName		string	`json:"last_name" bson:"last_name"`
 }
