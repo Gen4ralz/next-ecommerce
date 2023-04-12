@@ -15,4 +15,5 @@ type DatabaseRepo interface {
 	GetUserByEmail(email string)(*models.User, error)
 	InsertManyUser(users []models.User) (error)
 	DeleteAllUsers()(error)
+	GetUserByID(id string)(*models.User, error)
 }

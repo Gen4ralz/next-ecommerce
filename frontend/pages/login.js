@@ -1,17 +1,24 @@
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useContext, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { useForm } from 'react-hook-form'
 import { getError } from '../utils/error'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
-// import { Store } from '../utils/Store'
+import { Store } from '../utils/Store'
 import Cookies from 'js-cookie'
 
 export default function LoginScreen() {
   const router = useRouter()
-  // const { dispatch } = useContext(Store)
-  const [jwtToken, setJwtToken] = useState('')
+  const { state, dispatch } = useContext(Store)
+  const { userInfo } = state
+  const { redirect } = router.query
+
+  useEffect(() => {
+    if (userInfo?.name) {
+      router.push(redirect || '/')
+    }
+  }, [redirect, router, userInfo?.name])
 
   const {
     handleSubmit,
@@ -47,8 +54,9 @@ export default function LoginScreen() {
         toast.error(data.error)
       } else {
         // handle success
-        setJwtToken(data.access_token)
-        Cookies.set('jwt', data.access_token)
+        console.log(data)
+        dispatch({ type: 'USER_LOGIN', payload: data })
+        Cookies.set('userInfo', data?.tokens?.access_token)
         router.push('/')
       }
     } catch (err) {

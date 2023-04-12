@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -202,6 +203,8 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 		ID: user.ID.Hex(),
 		FirstName: user.FirstName,
 		LastName: user.LastName,
+		Email: user.Email,
+		IsAdmin: user.IsAdmin,
 	}
 
 	// generate tokens
@@ -215,5 +218,55 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 	refreshCookie := app.auth.GetRefreshCookie(tokens.RefreshToken)
 	http.SetCookie(res, refreshCookie)
 
-	app.writeJSON(res, http.StatusAccepted, tokens)
+	// Set the response payload
+		responsePayload := map[string]interface{}{
+			"name": 	user.FirstName,
+			"email":    user.Email,
+			"tokens":   tokens,
+			"isAdmin":  user.IsAdmin,
+			"_id":		user.ID,
+		}
+
+	app.writeJSON(res, http.StatusAccepted, responsePayload)
+}
+
+func (app *application) refreshToken(res http.ResponseWriter, req *http.Request) {
+	for _, cookie := range req.Cookies() {
+		claims := &Claims{}
+		refreshToken := cookie.Value
+
+		// parse the token to get the claims
+		_, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(app.JWTSecret), nil
+		})
+		if err != nil {
+			app.errorJSON(res, errors.New("unauthorized"), http.StatusUnauthorized)
+			return
+		}
+
+		// get the user id from the token claims
+		userID := claims.Subject
+
+		user, err := app.DB.GetUserByID(userID)
+		if err != nil {
+			app.errorJSON(res, errors.New("unknown user"), http.StatusUnauthorized)
+			return
+		}
+
+		u := jwtUser{
+			ID: userID,
+			FirstName: user.FirstName,
+			LastName: user.LastName,
+		}
+
+		tokenPairs, err := app.auth.GenerateTokenPair(&u)
+		if err != nil {
+			app.errorJSON(res, errors.New("error generating tokens"), http.StatusUnauthorized)
+			return
+		}
+
+		http.SetCookie(res, app.auth.GetRefreshCookie(tokenPairs.RefreshToken))
+
+		app.writeJSON(res, http.StatusOK, tokenPairs)
+	}
 }

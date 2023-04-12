@@ -149,3 +149,21 @@ func (m *MongoDBRepo) GetUserByEmail(email string)(*models.User, error) {
 
 	return &user, nil
 }
+
+func (m *MongoDBRepo) GetUserByID(id string)(*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	var user models.User
+
+	collection := m.DB.Client().Database("next-ecommerce").Collection("users")
+	err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user not found for id %s", id)
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}

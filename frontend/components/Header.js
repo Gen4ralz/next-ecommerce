@@ -4,13 +4,21 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useContext } from 'react'
 import { Store } from '../utils/Store'
+import Cookies from 'js-cookie'
+import { Menu } from '@headlessui/react'
 
 export default function Header() {
-  const { state } = useContext(Store)
-  const { cart } = state
   const router = useRouter()
+  const { state, dispatch } = useContext(Store)
+  const { cart, userInfo } = state
   const path = router.pathname
-  // const [phrase, setPhrase] = useState(initialState:'')
+
+  const logoutHandler = () => {
+    dispatch({ type: 'USER_LOGOUT' })
+    Cookies.remove('userInfo')
+    Cookies.remove('cartItems')
+    router.push('/')
+  }
   return (
     <div
       className={
@@ -48,17 +56,57 @@ export default function Header() {
                 </span>
               )}
             </Link>
-            <Link
-              href="/login"
-              className="w-14 h-12 rounded-lg bg-gray-100 border border-gray-200 flex justify-center items-center">
-              <Image
-                src="https://avatars.dicebear.com/api/bottts/2.svg"
-                alt="bottts"
-                width="28"
-                height="28"
-                className="rounded-lg mx-auto"
-              />
-            </Link>
+            {userInfo ? (
+              <Menu as="div" className="relative">
+                <div>
+                  <Menu.Button className="items-center space-x-2 w-14 h-12 rounded-lg bg-gray-100 border border-gray-200">
+                    <span className="text-blue-600">{userInfo.name}</span>
+                  </Menu.Button>
+                </div>
+                <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-md shadow-lg focus:outline-none">
+                  <div className="py-1">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href="/profile"
+                          className={`${
+                            active
+                              ? 'bg-gray-100 text-gray-900'
+                              : 'text-gray-700'
+                          } block px-4 py-2 text-sm`}>
+                          Profile
+                        </Link>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          onClick={logoutHandler}
+                          className={`${
+                            active
+                              ? 'bg-gray-100 text-gray-900'
+                              : 'text-gray-700'
+                          } block w-full text-left px-4 py-2 text-sm`}>
+                          Logout
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
+                </Menu.Items>
+              </Menu>
+            ) : (
+              <Link
+                href="/login"
+                className="w-14 h-12 rounded-lg bg-gray-100 border border-gray-200 flex justify-center items-center">
+                <Image
+                  src="https://avatars.dicebear.com/api/bottts/2.svg"
+                  alt="bottts"
+                  width="28"
+                  height="28"
+                  className="rounded-lg mx-auto"
+                />
+              </Link>
+            )}
           </div>
         </div>
       </div>
