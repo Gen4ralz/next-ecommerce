@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type Auth struct {
@@ -26,7 +26,7 @@ type jwtUser struct {
 }
 
 type TokenPairs struct {
-	Token			string	`json:"access_token" bson:"token"`
+	Token			string	`json:"access_token" bson:"access_token"`
 	RefreshToken	string	`json:"refresh_token" bson:"refresh_token"`
 }
 

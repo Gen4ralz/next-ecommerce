@@ -1,21 +1,17 @@
 import Link from 'next/link'
-import React, { useContext } from 'react'
+import React, { useState } from 'react'
 import Layout from '../components/Layout'
 import { useForm } from 'react-hook-form'
 import { getError } from '../utils/error'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
-import { Store } from '../utils/Store'
+// import { Store } from '../utils/Store'
 import Cookies from 'js-cookie'
 
 export default function LoginScreen() {
   const router = useRouter()
-  const { redirect } = router.query // login?redirect=/shipping
-  const { state, dispatch } = useContext(Store)
-  const { userInfo } = state
-  if (userInfo) {
-    router.push('/')
-  }
+  // const { dispatch } = useContext(Store)
+  const [jwtToken, setJwtToken] = useState('')
 
   const {
     handleSubmit,
@@ -40,7 +36,10 @@ export default function LoginScreen() {
         body: JSON.stringify(payload),
       }
 
-      const response = await fetch(`/authenticate`, requestOptions)
+      const response = await fetch(
+        `http://localhost:8080/authenticate`,
+        requestOptions
+      )
       const data = await response.json()
 
       if (data.error) {
@@ -48,9 +47,9 @@ export default function LoginScreen() {
         toast.error(data.error)
       } else {
         // handle success
-        dispatch({ type: 'USER_LOGIN', payload: data })
-        Cookies.set('userInfo', JSON.stringify(data))
-        router.push(redirect || '/')
+        setJwtToken(data.access_token)
+        Cookies.set('jwt', data.access_token)
+        router.push('/')
       }
     } catch (err) {
       // handle network error
@@ -104,7 +103,9 @@ export default function LoginScreen() {
           )}
         </div>
         <div className="mb-4">
-          <button className="primary-button w-full">Login</button>
+          <button className="primary-button w-full" type="submit">
+            Login
+          </button>
         </div>
         <div className="mb-4">
           Don&apos;t have an account? &nbsp;
