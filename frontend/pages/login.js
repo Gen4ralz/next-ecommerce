@@ -26,43 +26,39 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm()
 
-  const submitHandler = async ({ email, password }) => {
+  const submitHandler = ({ email, password }) => {
     // build the request payload
     let payload = {
       email: email,
       password: password,
     }
 
-    try {
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      }
-
-      const response = await fetch(
-        `http://localhost:8080/authenticate`,
-        requestOptions
-      )
-      const data = await response.json()
-
-      if (data.error) {
-        // handle error
-        toast.error(data.error)
-      } else {
-        // handle success
-        console.log(data)
-        dispatch({ type: 'USER_LOGIN', payload: data })
-        Cookies.set('userInfo', data?.tokens?.access_token)
-        router.push('/')
-      }
-    } catch (err) {
-      // handle network error
-      toast.error(getError(err))
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
     }
+
+    fetch(`http://localhost:8080/authenticate`, requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          // handle error
+          toast.error(data.error)
+        } else {
+          // handle success
+          dispatch({ type: 'USER_LOGIN', payload: data })
+          Cookies.set('userInfo', JSON.stringify(data))
+          router.push('/')
+        }
+      })
+      .catch((error) => {
+        // handle network error
+        toast.error(getError(error))
+      })
   }
 
   return (

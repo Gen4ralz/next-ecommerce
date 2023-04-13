@@ -42,11 +42,7 @@ export default function ProductScreen(props) {
 
       // Check if the item already exists in the cart
       const existingCartItem = state.cart.cartItems.find(
-        (item) =>
-          item.product.slug === product.slug &&
-          item.color.name === selectedColor.name &&
-          item.size.name === selectedSize.name &&
-          item.color.sku === selectedColor.sku
+        (item) => item.color.sku === selectedColor.sku
       )
 
       if (existingCartItem) {
@@ -393,8 +389,6 @@ export async function getServerSideProps(context) {
   const data = await response.json().catch((err) => {
     console.log(err)
   })
-
-  console.log(data)
 
   return {
     props: {

@@ -7,8 +7,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useContext } from 'react'
 import { Store } from '../utils/Store'
+import dynamic from 'next/dynamic'
 
-export default function Footer() {
+function Footer() {
   const router = useRouter()
   const path = router.pathname
   const { state } = useContext(Store)
@@ -59,3 +60,5 @@ export default function Footer() {
     </footer>
   )
 }
+
+export default dynamic(() => Promise.resolve(Footer), { ssr: false })

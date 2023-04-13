@@ -226,8 +226,7 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 			"isAdmin":  user.IsAdmin,
 			"_id":		user.ID,
 		}
-
-	app.writeJSON(res, http.StatusAccepted, responsePayload)
+		app.writeJSON(res, http.StatusAccepted, responsePayload)
 }
 
 func (app *application) refreshToken(res http.ResponseWriter, req *http.Request) {
