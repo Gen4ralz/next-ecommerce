@@ -15,7 +15,6 @@ type Auth struct {
 	Audience 		string
 	Secret			string
 	TokenExpiry 	time.Duration
-	RefreshExpiry	time.Duration
 	CookieDomain	string
 	CookiePath		string
 	CookieName		string
@@ -31,7 +30,6 @@ type jwtUser struct {
 
 type TokenPairs struct {
 	Token			string	`json:"access_token" bson:"access_token"`
-	RefreshToken	string	`json:"refresh_token" bson:"refresh_token"`
 }
 
 type Claims	struct {
@@ -62,57 +60,13 @@ func (j *Auth) GenerateTokenPair(user *jwtUser) (TokenPairs, error) {
 		return TokenPairs{}, err
 	}
 
-	// Create a refresh token and set claims
-	refreshToken := jwt.New(jwt.SigningMethodHS256)
-	refreshTokenClaims := refreshToken.Claims.(jwt.MapClaims)
-	refreshTokenClaims["sub"] = fmt.Sprint(user.ID)
-	refreshTokenClaims["iat"] = time.Now().UTC().Unix()
-
-	// Set the expiry for the refresh token
-	refreshTokenClaims["exp"] = time.Now().UTC().Add(j.RefreshExpiry).Unix()
-
-	// Create signed refresh token
-	signedRefreshToken, err := refreshToken.SignedString([]byte(j.Secret))
-	if err != nil {
-		return TokenPairs{}, err
-	}
-
 	// Create TokenPairs and populate with signed tokens
 	var tokenPairs = TokenPairs {
 		Token: signedAccessToken,
-		RefreshToken: signedRefreshToken,
 	}
 
 	// Return TokenPairs
 	return tokenPairs, nil
-}
-
-func (j *Auth) GetRefreshCookie(refreshToken string) *http.Cookie {
-	return &http.Cookie{
-		Name: j.CookieName,
-		Path: j.CookiePath,
-		Value: refreshToken,
-		Expires: time.Now().Add(j.RefreshExpiry),
-		MaxAge: int(j.RefreshExpiry.Seconds()),
-		SameSite: http.SameSiteStrictMode,
-		Domain: "",
-		HttpOnly: true,
-		Secure: true,
-	}
-}
-
-func (j *Auth) GetExpiredRefreshCookie(refreshToken string) *http.Cookie {
-	return &http.Cookie{
-		Name: j.CookieName,
-		Path: j.CookiePath,
-		Value: "",
-		Expires: time.Unix(0, 0),
-		MaxAge: -1,
-		SameSite: http.SameSiteStrictMode,
-		Domain: "",
-		HttpOnly: true,
-		Secure: true,
-	}
 }
 
 func (j *Auth) GetTokenFromHeaderAndVerify(res http.ResponseWriter, req *http.Request) (string, *Claims, error) {

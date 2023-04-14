@@ -25,7 +25,7 @@ function Header() {
     dispatch({ type: 'USER_LOGOUT' })
     Cookies.remove('userInfo')
     Cookies.remove('cartItems')
-    router.push('/')
+    router.push('/login')
   }
   return (
     <div

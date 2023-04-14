@@ -60,7 +60,6 @@ func main() {
 		Audience: app.JWTAudience,
 		Secret: app.JWTSecret,
 		TokenExpiry: time.Minute * 10,
-		RefreshExpiry: time.Hour *24,
 		CookiePath: "/",
 		CookieName: "refresh-token",
 		CookieDomain: app.CookieDomain,
