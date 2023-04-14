@@ -3,8 +3,10 @@ import Cookies from 'js-cookie'
 
 export const Store = createContext()
 
-const cart = Cookies.get('cart')
-  ? JSON.parse(Cookies.get('cart'))
+const ls = typeof window !== 'undefined' ? window.localStorage : null
+
+const cart = ls?.getItem('cart')
+  ? JSON.parse(ls.getItem('cart'))
   : {
       cartItems: [],
       shippingAddress: { location: {} },
@@ -37,11 +39,11 @@ function reducer(state, action) {
           // item.size === size &&
           item.sku === sku ? newItem : item
         )
-        Cookies.set('cart', JSON.stringify({ ...state.cart, cartItems }))
+        ls?.setItem('cart', JSON.stringify({ ...state.cart, cartItems }))
         return { ...state, cart: { ...state.cart, cartItems } }
       } else {
         const cartItems = [...state.cart.cartItems, newItem]
-        Cookies.set('cart', JSON.stringify({ ...state.cart, cartItems }))
+        ls?.setItem('cart', JSON.stringify({ ...state.cart, cartItems }))
         return { ...state, cart: { ...state.cart, cartItems } }
       }
     }
@@ -49,7 +51,7 @@ function reducer(state, action) {
       const cartItems = state.cart.cartItems.filter(
         (item) => item.sku !== action.payload.sku
       )
-      Cookies.set('cart', JSON.stringify({ ...state.cart, cartItems }))
+      ls?.setItem('cart', JSON.stringify({ ...state.cart, cartItems }))
       return { ...state, cart: { ...state.cart, cartItems } }
     }
     case 'USER_LOGIN':
