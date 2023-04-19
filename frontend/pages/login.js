@@ -52,7 +52,7 @@ export default function LoginScreen() {
           // handle success
           dispatch({ type: 'USER_LOGIN', payload: data })
           Cookies.set('userInfo', JSON.stringify(data))
-          router.push('/')
+          router.push(redirect || '/')
         }
       })
       .catch((error) => {

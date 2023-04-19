@@ -5,14 +5,19 @@ import React, { useContext } from 'react'
 import Layout from '../components/Layout'
 import { Store } from '../utils/Store'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
 
 function CartScreen() {
+  const router = useRouter()
   const { state, dispatch } = useContext(Store)
   const {
     cart: { cartItems },
   } = state
   const removeItemHandler = (item) => {
     dispatch({ type: 'CART_REMOVE_ITEM', payload: item })
+  }
+  const checkoutHandler = () => {
+    router.push('/shipping')
   }
   return (
     <Layout title="Cart">
@@ -69,11 +74,11 @@ function CartScreen() {
           </p>
         </div>
         <div className="mt-6">
-          <Link
-            href="#"
-            className="flex items-center justify-center rounded-md border border-transparent bg-black px-6 py-3 text-base font-medium text-white shadow-sm">
+          <button
+            onClick={checkoutHandler}
+            className="w-full flex items-center justify-center rounded-md border border-transparent bg-black px-6 py-3 text-base font-medium text-white shadow-sm">
             Checkout
-          </Link>
+          </button>
         </div>
         <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
           <p>

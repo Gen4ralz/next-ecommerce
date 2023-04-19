@@ -5,16 +5,18 @@ export const Store = createContext()
 
 const ls = typeof window !== 'undefined' ? window.localStorage : null
 
-const cart = ls?.getItem('cart')
-  ? JSON.parse(ls.getItem('cart'))
-  : {
-      cartItems: [],
-      shippingAddress: { location: {} },
-      paymentMethod: '',
-    }
-
 const initialState = {
-  cart,
+  // cart: {
+  //   cartItems: ls?.getItem('cartItems')
+  //     ? JSON.parse(ls?.getItem('cartItems'))
+  //     : [],
+  //   shippingAddress: ls?.getItem('shippingAddress')
+  //     ? JSON.parse(ls?.getItem('shippingAddress'))
+  //     : {},
+  // },
+  cart: ls?.getItem('cart')
+    ? JSON.parse(ls?.getItem('cart'))
+    : { cartItems: [], shippingAddress: {} },
   userInfo: Cookies.get('userInfo')
     ? JSON.parse(Cookies.get('userInfo'))
     : null,
@@ -58,6 +60,14 @@ function reducer(state, action) {
       return { ...state, userInfo: action.payload }
     case 'USER_LOGOUT':
       return { ...state, userInfo: null, cart: { cartItems: [] } }
+    case 'SAVE_SHIPPING_ADDRESS':
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          shippingAddress: { ...state.cart.shippingAddress, ...action.payload },
+        },
+      }
     default:
       return state
   }

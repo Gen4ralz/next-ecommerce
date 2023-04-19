@@ -24,7 +24,7 @@ function Header() {
   const logoutHandler = () => {
     dispatch({ type: 'USER_LOGOUT' })
     Cookies.remove('userInfo')
-    Cookies.remove('cartItems')
+    localStorage.removeItem('cartItems')
     router.push('/login')
   }
   return (
