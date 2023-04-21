@@ -49,13 +49,13 @@ export default function ShippingScreen() {
     <Layout title="Shipping Address">
       <CheckoutWizard activeStep={1} />
       <form
-        className="mx-auto max-w-screen-md"
+        className="mx-4 md:mx-auto max-w-screen-md"
         onSubmit={handleSubmit(submitHandler)}>
         <h1 className="mb-4 text-xl">Shipping Address</h1>
         <div className="mb-4">
           <label htmlFor="fullName">Full Name</label>
           <input
-            className="w-full"
+            className="w-full mt-2"
             id="fullName"
             autoFocus
             {...register('fullName', { required: 'Please enter full name' })}
@@ -67,7 +67,7 @@ export default function ShippingScreen() {
         <div className="mb-4">
           <label htmlFor="address">Address</label>
           <input
-            className="w-full"
+            className="w-full mt-2"
             id="address"
             autoFocus
             {...register('address', {
@@ -82,7 +82,7 @@ export default function ShippingScreen() {
         <div className="mb-4">
           <label htmlFor="postalCode">Postal Code</label>
           <input
-            className="w-full"
+            className="w-full mt-2"
             id="postalCode"
             autoFocus
             {...register('postalCode', {
@@ -97,7 +97,7 @@ export default function ShippingScreen() {
         <div className="mb-4">
           <label htmlFor="phone">Phone</label>
           <input
-            className="w-full"
+            className="w-full mt-2"
             id="phone"
             autoFocus
             {...register('phone', {

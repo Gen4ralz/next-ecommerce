@@ -44,10 +44,12 @@ export default function LoginScreen() {
 
     fetch(`http://localhost:8080/authenticate`, requestOptions)
       .then((response) => response.json())
+
       .then((data) => {
+        console.log(data)
         if (data.error) {
           // handle error
-          toast.error(data.error)
+          toast.error(data.message)
         } else {
           // handle success
           dispatch({ type: 'USER_LOGIN', payload: data })

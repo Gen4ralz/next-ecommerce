@@ -225,3 +225,15 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 		}
 		app.writeJSON(res, http.StatusAccepted, responsePayload)
 }
+
+func (app *application) orders(res http.ResponseWriter, req *http.Request) {
+		// read json payload
+		var requestPayload struct {
+			orderItems		string		`json:"email" bson:"email"`
+        	shippingAddress	string		`json:"email" bson:"email"`
+        	paymentMethod	string		`json:"email" bson:"email"`
+        	itemsPrice		int			`json:"email" bson:"email"`
+        	shipping		string		`json:"email" bson:"email"`
+        	totalPrice		int			`json:"email" bson:"email"`
+		}
+}
