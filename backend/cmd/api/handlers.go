@@ -84,31 +84,27 @@ func (app *application) SeedProducts(res http.ResponseWriter, req *http.Request)
 		},
 		Colors: []models.Color{
 			{
-				Name:   "Brick",
+				ColorName:   "Brick",
 				Class:  "#A0522D",
-				Sizes:  []models.Size{{Name: "Freesize", Stock: 5}},
-				SKU:    "nina-bn",
+				Sizes:  []models.Size{{Name: "Freesize", Stock: 5, Sku: "nina-bn-freesize",}},
 				Image:  "/images/nina-bn.jpg",
 			},
 			{
-				Name:   "Cream",
+				ColorName:   "Cream",
 				Class:  "#FFF5EE",
-				Sizes:  []models.Size{{Name: "Freesize", Stock: 2}},
-				SKU:    "nina-cm",
+				Sizes:  []models.Size{{Name: "Freesize", Stock: 2, Sku: "nina-cm-freesize",}},
 				Image:  "/images/nina-cm.jpg",
 			},	
 			{
-				Name:   "Olive",
+				ColorName:   "Olive",
 				Class:  "#556B2F",
-				Sizes:  []models.Size{{Name: "Freesize", Stock: 0}},
-				SKU:    "nina-gn",
+				Sizes:  []models.Size{{Name: "Freesize", Stock: 0, Sku: "nina-gn-freesize",}},
 				Image:  "/images/nina-gn.jpg",
 			},
 			{
-				Name:   "Pink",
+				ColorName:   "Pink",
 				Class:  "#DDA0DD",
-				Sizes:  []models.Size{{Name: "Freesize", Stock: 5}},
-				SKU:    "nina-pk",
+				Sizes:  []models.Size{{Name: "Freesize", Stock: 5, Sku: "nina-pk-freesize"}},
 				Image:  "/images/nina-pk.jpg",
 			},
 		},
@@ -226,14 +222,53 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 		app.writeJSON(res, http.StatusAccepted, responsePayload)
 }
 
-func (app *application) orders(res http.ResponseWriter, req *http.Request) {
-		// read json payload
-		var requestPayload struct {
-			orderItems		string		`json:"email" bson:"email"`
-        	shippingAddress	string		`json:"email" bson:"email"`
-        	paymentMethod	string		`json:"email" bson:"email"`
-        	itemsPrice		int			`json:"email" bson:"email"`
-        	shipping		string		`json:"email" bson:"email"`
-        	totalPrice		int			`json:"email" bson:"email"`
-		}
+func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) {
+	// Parse request body
+	var order models.Order
+	err := app.readJSON(res, req, &order)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+	tokenString, _, err := app.auth.GetTokenFromHeaderAndVerify(res, req)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+	userEmail, err := app.auth.SearchUserEmailFromToken(tokenString)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+	log.Println(userEmail)
+
+	user, err := app.DB.GetUserByEmail(userEmail)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+	order.UserID = user.ID.Hex()
+	log.Println(order.UserID)
+	order.IsDelivered = false
+	order.IsPaid = false
+	order.CreatedAt = time.Now()
+	order.UpdatedAt = time.Now()
+
+
+	// Save order to database
+	err = app.DB.CreateOrder(&order)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return success response
+	resp := JSONResponse {
+		Error: false,
+		Message: "Order has been created",
+	}
+	app.writeJSON(res, http.StatusCreated, resp)
 }

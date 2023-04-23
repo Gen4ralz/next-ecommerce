@@ -19,6 +19,11 @@ function CartScreen() {
   const checkoutHandler = () => {
     router.push('/shipping')
   }
+
+  const updateCartHandler = (item, qty) => {
+    const quantity = Number(qty)
+    dispatch({ type: 'CART_ADD_ITEM', payload: { ...item, quantity } })
+  }
   return (
     <Layout title="Cart">
       <h1 className="text-2xl font-bold px-2 py-4">CART</h1>
@@ -37,10 +42,10 @@ function CartScreen() {
                 {cartItems.map((item) => (
                   <li key={item.sku} className="flex py-6">
                     <div className="w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                      <Link href={`/product/${item.product.slug}`}>
+                      <Link href={`/product/${item.slug}`}>
                         <img
-                          src={item.color.image}
-                          alt={item.color.name}
+                          src={item.image}
+                          alt={item.color}
                           className="h-full w-full object-cover object-center"
                         />
                       </Link>
@@ -48,15 +53,28 @@ function CartScreen() {
                     <div className="ml-4 flex flex-1 flex-col">
                       <div>
                         <div className="flex justify-between text-base font-medium text-gray-900">
-                          <p>{item.product.name}</p>
-                          <p>{item.product.price} ฿</p>
+                          <p>{item.color}</p>
+                          <p>{item.price * item.quantity} ฿</p>
                         </div>
                         <p className="mt-1 text-sm text-gray-500">
-                          {item.color.name} &nbsp;|&nbsp; {item.size.name}
+                          {item.color} &nbsp;|&nbsp; {item.size}
                         </p>
                       </div>
                       <div className="flex flex-1 items-end justify-between text-sm">
-                        <p className="text-gray-500">Qty {item.quantity}</p>
+                        <p className="text-gray-500">
+                          Qty{' '}
+                          <select
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateCartHandler(item, e.target.value)
+                            }>
+                            {[...Array(item.stock).keys()].map((x) => (
+                              <option key={x + 1} value={x + 1}>
+                                {x + 1}
+                              </option>
+                            ))}
+                          </select>
+                        </p>
                         <div className="flex">
                           <button
                             type="button"
@@ -78,11 +96,7 @@ function CartScreen() {
                 Subtotal: ({cartItems.reduce((a, c) => a + c.quantity, 0)} pcs.)
               </p>
               <p className="font-bold text-xl text-emerald-500">
-                {cartItems.reduce(
-                  (a, c) => a + c.quantity * c.product.price,
-                  0
-                )}{' '}
-                ฿
+                {cartItems.reduce((a, c) => a + c.quantity * c.price, 0)} ฿
               </p>
             </div>
             <div className="mt-6">

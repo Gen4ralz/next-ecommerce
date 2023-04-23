@@ -24,15 +24,17 @@ func (app *application) routes() http.Handler {
 	mux.Get("/", app.Home)
 
 	mux.Post("/authenticate", app.authenticate)
-	mux.Post("/orders", app.orders)
+	
 
 	mux.Get("/products", app.AllProducts)
 	mux.Get("/products/{slug}", app.ProductBySlug)
 	mux.Get("/products/seed", app.SeedProducts)
 	mux.Get("/users/seed", app.SeedUsers)
 
-	mux.Route("/admin", func(mux chi.Router) {
+	mux.Route("/api", func(mux chi.Router) {
 		mux.Use(app.authRequired)
+
+		mux.Post("/orders", app.CreateOrder)
 	})
 
 	return mux

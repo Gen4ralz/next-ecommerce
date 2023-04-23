@@ -8,7 +8,7 @@ const ls = typeof window !== 'undefined' ? window.localStorage : null
 const initialState = {
   cart: ls?.getItem('cart')
     ? JSON.parse(ls?.getItem('cart'))
-    : { cartItems: [], shippingAddress: {}, paymentMethod: {} },
+    : { cartItems: [], shippingAddress: {}, paymentMethod: '' },
   userInfo: Cookies.get('userInfo')
     ? JSON.parse(Cookies.get('userInfo'))
     : null,

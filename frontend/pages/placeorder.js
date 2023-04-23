@@ -7,10 +7,11 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { toast } from 'react-toastify'
 import { getError } from '../utils/error'
+import dynamic from 'next/dynamic'
 
-export default function PlaceOrderScreen() {
+function PlaceOrderScreen() {
   const { state, dispatch } = useContext(Store)
-  const { cart } = state
+  const { userInfo, cart } = state
   const { cartItems, shippingAddress, paymentMethod } = cart
   const router = useRouter()
 
@@ -20,54 +21,70 @@ export default function PlaceOrderScreen() {
     cartItems.reduce((a, c) => a + c.quantity * c.product.price, 0)
   )
 
-  const shipping = 0
+  const shippingFee = 0
 
-  const totalPrice = itemsPrice + shipping
+  const totalPrice = itemsPrice + shippingFee
 
   useEffect(() => {
     if (!paymentMethod) {
       router.push('/payment')
     }
-  }, [paymentMethod, router])
+    if (cartItems.length === 0) {
+      router.push('/cart')
+    }
+  }, [cartItems.length, paymentMethod, router])
 
   const [loading, setLoading] = useState(false)
 
-  const placeOrderHandler = async () => {
-    try {
-      setLoading(true)
-      let payload = {
-        orderItems: cartItems,
-        shippingAddress: shippingAddress,
-        paymentMethod: paymentMethod,
-        itemsPrice: itemsPrice,
-        shipping: shipping,
-        totalPrice: totalPrice,
-      }
+  const placeOrderHandler = () => {
+    setLoading(true)
+    let payload = {
+      orderItems: cartItems,
+      shipping_address: shippingAddress,
+      paymentMethod: paymentMethod,
+      itemsPrice: itemsPrice,
+      shippingFee: shippingFee,
+      totalPrice: totalPrice,
+    }
 
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      }
+    const headers = new Headers()
+    headers.append('Content-Type', 'application/json')
+    headers.append(
+      'Authorization',
+      'Bearer ' + `${userInfo.tokens.access_token}`
+    )
 
-      await fetch(`http://localhost:8080/orders`, requestOptions)
-        .then((response) => response.json())
-        .then((data) => {
+    const requestOptions = {
+      method: 'POST',
+      headers: headers,
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    }
+
+    console.log('Header: ', headers)
+    console.log('ENV: ', process.env.URL)
+
+    fetch(`http://localhost:8080/api/orders`, requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
           setLoading(false)
+          toast.error(data.message)
+        } else {
           dispatch({ type: 'CART_CLEAR_ITEMS' })
           localStorage.setItem(
             'cart',
             JSON.stringify({ ...cart, cartItems: [] })
           )
+          setLoading(false)
           router.push(`/order/${data._id}`)
-        })
-    } catch (err) {
-      setLoading(false)
-      toast.error(getError(err))
-    }
+        }
+      })
+      .catch((error) => {
+        // handle network error
+        setLoading(false)
+        toast.error(getError(error))
+      })
   }
 
   return (
@@ -164,7 +181,7 @@ export default function PlaceOrderScreen() {
                     <div className="mb-2 flex justify-between">
                       <div>Shipping</div>
                       <p className="text-red-700">
-                        {shipping === 0 ? 'Free' : 30}
+                        {shippingFee === 0 ? 'Free' : 30}
                       </p>
                     </div>
                   </li>
@@ -191,3 +208,5 @@ export default function PlaceOrderScreen() {
     </Layout>
   )
 }
+
+export default dynamic(() => Promise.resolve(PlaceOrderScreen), { ssr: false })

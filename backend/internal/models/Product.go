@@ -26,16 +26,16 @@ type Image struct {
 }
 
 type Color struct {
-    Name  		string   	`json:"name" bson:"name"`
+    ColorName  		string  `json:"colorname" bson:"colorname"`
     Class 		string   	`json:"class" bson:"class"`
     Sizes 		[]Size   	`json:"sizes" bson:"sizes"`
-    SKU   		string   	`json:"sku" bson:"sku"`
     Image 		string   	`json:"image" bson:"image"`
 }
 
 type Size struct {
-    Name  		string 		`json:"name" bson:"name"`
+    Name  		string 		`json:"sizename" bson:"sizename"`
     Stock 		int    		`json:"stock" bson:"stock"`
+    Sku   		string   	`json:"sku" bson:"sku"`
 }
 
 type Detail struct {

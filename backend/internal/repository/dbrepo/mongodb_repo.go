@@ -167,3 +167,16 @@ func (m *MongoDBRepo) GetUserByID(id string)(*models.User, error) {
 
 	return &user, nil
 }
+
+func (m *MongoDBRepo) CreateOrder(order *models.Order) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	// order.ID = primitive.NewObjectID()
+	collection := m.DB.Client().Database("next-ecommerce").Collection("orders")
+	_, err := collection.InsertOne(ctx, order)
+	if err != nil {
+		return err
+	}
+	return nil
+}

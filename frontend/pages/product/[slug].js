@@ -33,16 +33,24 @@ export default function ProductScreen(props) {
   const addToCartHandler = () => {
     if (selectedColor && selectedSize) {
       const cartItem = {
-        product: product,
-        color: selectedColor,
-        size: selectedSize,
-        sku: selectedColor.sku,
+        name: product.name,
+        slug: product.slug,
+        category: product.category,
+        image: selectedColor.image,
+        color: selectedColor.colorname,
+        size: selectedSize.sizename,
+        price: product.price,
+        brand: product.brand,
+        stock: selectedSize.stock,
+        sku: selectedSize.sku,
         quantity: 1,
       }
 
+      console.log(cartItem)
+
       // Check if the item already exists in the cart
       const existingCartItem = state.cart.cartItems.find(
-        (item) => item.color.sku === selectedColor.sku
+        (item) => item.sku === selectedSize.sku
       )
 
       if (existingCartItem) {
@@ -165,7 +173,7 @@ export default function ProductScreen(props) {
               <div className="flex items-center space-x-2">
                 {product.colors.map((color) => (
                   <RadioGroup.Option
-                    key={color.name}
+                    key={color.colorname}
                     value={color}
                     className={({ active, checked }) =>
                       classNames(
@@ -176,7 +184,7 @@ export default function ProductScreen(props) {
                     }>
                     <RadioGroup.Label as="span" className="sr-only">
                       {' '}
-                      {color.name}{' '}
+                      {color.colorname}{' '}
                     </RadioGroup.Label>
                     <span
                       aria-hidden="true"
@@ -203,7 +211,7 @@ export default function ProductScreen(props) {
                 <div className="flex items-center space-x-2">
                   {selectedColor.sizes.map((size) => (
                     <RadioGroup.Option
-                      key={size.name}
+                      key={size.sku}
                       value={size}
                       className={({ active }) =>
                         classNames(
@@ -218,7 +226,7 @@ export default function ProductScreen(props) {
                       {({ active, checked }) => (
                         <>
                           <RadioGroup.Label as="span">
-                            {size.name}
+                            {size.sizename}
                           </RadioGroup.Label>
                           {size.stock > 0 ? (
                             <span
