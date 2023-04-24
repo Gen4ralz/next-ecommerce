@@ -19,18 +19,9 @@ function reducer(state, action) {
     case 'CART_ADD_ITEM': {
       const newItem = action.payload
       const { sku } = newItem
-      const existItem = state.cart.cartItems.find(
-        (item) =>
-          // item.slug === name &&
-          // item.color === color &&
-          // item.size === size &&
-          item.sku === sku
-      )
+      const existItem = state.cart.cartItems.find((item) => item.sku === sku)
       if (existItem) {
         const cartItems = state.cart.cartItems.map((item) =>
-          // item.name === name &&
-          // item.color === color &&
-          // item.size === size &&
           item.sku === sku ? newItem : item
         )
         ls?.setItem('cart', JSON.stringify({ ...state.cart, cartItems }))

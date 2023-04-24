@@ -7,8 +7,8 @@ import (
 )
 
 type Order struct {
-	ID        		primitive.ObjectID 	`bson:"_id,omitempty" json:"id,omitempty"`
-	UserID			string			`json:"userid" bson:"userid"`
+	ID        		primitive.ObjectID 	`bson:"_id,omitempty" json:"id,omitempty"`				
+	UserID			string			`json:"user_id" bson:"user_id"`
     OrderItems  	[]OrderItems	`json:"orderItems" bson:"orderItems"`
 	ShippingAddress	ShippingAddress	`json:"shipping_address" bson:"shipping_address"`
 	PaymentMethod	string			`json:"paymentMethod" bson:"paymentMethod"`
@@ -24,7 +24,7 @@ type Order struct {
 }
 
 type ShippingAddress struct {
-    FullName	string		`json:"fullName" bson:"fullName"`
+    FullName	string		`json:"fullName" bson:"full_name"`
 	Address		string		`json:"address" bson:"address"`
 	PostalCode	string		`json:"postalCode" bson:"postalCode"`
 	Phone		string		`json:"phone" bson:"phone"`
@@ -32,9 +32,15 @@ type ShippingAddress struct {
 }
 
 type OrderItems struct {
+	Name		string		`json:"name" bson:"name"`
 	Quantity	int			`json:"quantity" bson:"quantity"`
-	SKU			string		`json:"sku" bson:"sku"`
-	Product		Product		`json:"product" bson:"product"`
-	Color		Color		`json:"color" bson:"color"`
-	Size		Size		`json:"size" bson:"size"`
+	Image		string		`json:"image" bson:"image"`
+	Sku			string		`json:"sku" bson:"sku"`
+	Price		int			`json:"price" bson:"price"`
+	Color		string		`json:"color" bson:"color"`
+	Size		string		`json:"size" bson:"size"`
+	Slug        string      `json:"slug" bson:"slug"`
+    Category    string      `json:"category" bson:"category"`
+	Stock		int			`json:"stock" bson:"stock"`
+	Brand		string		`json:"brand" bson:"brand"`
 }

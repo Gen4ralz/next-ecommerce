@@ -4,13 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"math/rand"
 	"net/http"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type JSONResponse struct {
 	Error bool	`json:"error"`
 	Message string	`json:"message"`
-	Date interface{}	`json:"data,omitempty"`
+	Data interface{}	`json:"data,omitempty"`
 }
 
 func (app *application) writeJSON(res http.ResponseWriter, status int, data interface{}, headers ...http.Header) error {
@@ -64,4 +68,33 @@ func (app *application) errorJSON(res http.ResponseWriter, err error, status ...
 	payload.Error = true
 	payload.Message = err.Error()
 	return app.writeJSON(res, statusCode, payload)
+}
+
+func (app *application) generateOrderID() primitive.ObjectID {
+    // Get current date in the format DDMMYY
+    currentDate := time.Now().Format("02012006")
+
+    // Append 000000 to make it 12 characters long
+    orderIDString := currentDate + "0000"
+
+    randString := RandomString(12)
+
+    // Append 12 random characters to make it 24 characters long
+    orderIDString += randString
+
+    // Convert order ID string to ObjectId
+    orderID, _ := primitive.ObjectIDFromHex(orderIDString)
+
+    return orderID
+}
+
+func RandomString(n int) string {
+    var letters = []rune("0123456789abcdef")
+    rand.Seed(time.Now().UnixNano())
+
+    b := make([]rune, n)
+    for i := range b {
+        b[i] = letters[rand.Intn(len(letters))]
+    }
+    return string(b)
 }

@@ -18,7 +18,7 @@ function PlaceOrderScreen() {
   const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100
 
   const itemsPrice = round2(
-    cartItems.reduce((a, c) => a + c.quantity * c.product.price, 0)
+    cartItems.reduce((a, c) => a + c.quantity * c.price, 0)
   )
 
   const shippingFee = 0
@@ -36,7 +36,8 @@ function PlaceOrderScreen() {
 
   const [loading, setLoading] = useState(false)
 
-  const placeOrderHandler = () => {
+  const placeOrderHandler = (e) => {
+    e.preventDefault()
     setLoading(true)
     let payload = {
       orderItems: cartItems,
@@ -46,6 +47,8 @@ function PlaceOrderScreen() {
       shippingFee: shippingFee,
       totalPrice: totalPrice,
     }
+
+    console.log(payload)
 
     const headers = new Headers()
     headers.append('Content-Type', 'application/json')
@@ -61,23 +64,23 @@ function PlaceOrderScreen() {
       body: JSON.stringify(payload),
     }
 
-    console.log('Header: ', headers)
-    console.log('ENV: ', process.env.URL)
+    console.log(requestOptions)
 
     fetch(`http://localhost:8080/api/orders`, requestOptions)
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
           setLoading(false)
+          console.log(data.message)
           toast.error(data.message)
         } else {
+          setLoading(false)
           dispatch({ type: 'CART_CLEAR_ITEMS' })
           localStorage.setItem(
             'cart',
             JSON.stringify({ ...cart, cartItems: [] })
           )
-          setLoading(false)
-          router.push(`/order/${data._id}`)
+          router.push(`/order/${data.data.order_id}`)
         }
       })
       .catch((error) => {
@@ -132,10 +135,10 @@ function PlaceOrderScreen() {
                 {cartItems.map((item) => (
                   <li key={item.sku} className="flex py-3">
                     <div className="w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                      <Link href={`/product/${item.product.slug}`}>
+                      <Link href={`/product/${item.slug}`}>
                         <Image
-                          src={item.color.image}
-                          alt={item.color.name}
+                          src={item.image}
+                          alt={item.color}
                           className="h-full w-full object-cover object-center"
                           width={50}
                           height={50}
@@ -146,11 +149,11 @@ function PlaceOrderScreen() {
                     <div className="ml-4 flex flex-1 flex-col">
                       <div>
                         <div className="flex justify-between text-base font-medium text-gray-900">
-                          <p>{item.product.name}</p>
-                          <p>{item.product.price} ฿</p>
+                          <p>{item.name}</p>
+                          <p>{item.price * item.quantity} ฿</p>
                         </div>
                         <p className="mt-1 text-sm text-gray-500">
-                          {item.color.name} &nbsp;|&nbsp; {item.size.name}
+                          {item.color} &nbsp;|&nbsp; {item.size}
                         </p>
                       </div>
                       <div className="flex flex-1 items-end justify-between text-sm">
@@ -174,13 +177,13 @@ function PlaceOrderScreen() {
                   <li>
                     <div className="mb-2 flex justify-between">
                       <div>Items</div>
-                      <div>${itemsPrice}</div>
+                      <div>{itemsPrice} ฿</div>
                     </div>
                   </li>
                   <li>
                     <div className="mb-2 flex justify-between">
                       <div>Shipping</div>
-                      <p className="text-red-700">
+                      <p className="text-green-500">
                         {shippingFee === 0 ? 'Free' : 30}
                       </p>
                     </div>
@@ -188,7 +191,7 @@ function PlaceOrderScreen() {
                   <li>
                     <div className="mb-2 flex justify-between">
                       <div>Total</div>
-                      <div>${totalPrice}</div>
+                      <div>{totalPrice} ฿</div>
                     </div>
                   </li>
                   <li>

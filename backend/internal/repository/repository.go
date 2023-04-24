@@ -16,5 +16,5 @@ type DatabaseRepo interface {
 	InsertManyUser(users []models.User) (error)
 	DeleteAllUsers()(error)
 	GetUserByID(id string)(*models.User, error)
-	CreateOrder(order *models.Order) error
+	CreateOrder(order models.Order) (string, error)
 }

@@ -168,15 +168,31 @@ func (m *MongoDBRepo) GetUserByID(id string)(*models.User, error) {
 	return &user, nil
 }
 
-func (m *MongoDBRepo) CreateOrder(order *models.Order) error {
+func (m *MongoDBRepo) CreateOrder(order models.Order) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
 	defer cancel()
 
-	// order.ID = primitive.NewObjectID()
-	collection := m.DB.Client().Database("next-ecommerce").Collection("orders")
-	_, err := collection.InsertOne(ctx, order)
+	// var newID string
+	collection := m.DB.Collection("orders")
+	_, err := collection.InsertOne(ctx, bson.M{
+		"_id":			 order.ID,
+		"user_id":       order.UserID,
+		"order_items":   order.OrderItems,
+		"shipping":      order.ShippingAddress,
+		"payment":       order.PaymentMethod,
+		"items_price":   order.ItemsPrice,
+		"shipping_fee":  order.ShippingFee,
+		"total_price":   order.TotalPrice,
+		"is_paid":       order.IsPaid,
+		"paid_at":       order.PaidAt,
+		"is_delivered":  order.IsDelivered,
+		"delivered_at":  order.DeliveredAt,
+		"created_at":    order.CreatedAt,
+		"updated_at":    order.UpdatedAt,
+	})
 	if err != nil {
-		return err
+		return "",err
 	}
-	return nil
+
+	return order.ID.Hex(), nil
 }

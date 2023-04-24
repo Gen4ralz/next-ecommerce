@@ -224,8 +224,8 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 
 func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) {
 	// Parse request body
-	var order models.Order
-	err := app.readJSON(res, req, &order)
+	var payload models.Order
+	err := app.readJSON(res, req, &payload)
 	if err != nil {
 		app.errorJSON(res, err)
 		return
@@ -249,17 +249,20 @@ func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) 
 		app.errorJSON(res, err)
 		return
 	}
+	
+	payload.ID = app.generateOrderID()
 
-	order.UserID = user.ID.Hex()
-	log.Println(order.UserID)
-	order.IsDelivered = false
-	order.IsPaid = false
-	order.CreatedAt = time.Now()
-	order.UpdatedAt = time.Now()
+	payload.UserID = user.ID.Hex()
+	payload.IsDelivered = false
+	payload.IsPaid = false
+	payload.CreatedAt = time.Now()
+	payload.UpdatedAt = time.Now()
+
+	log.Println(payload)
 
 
 	// Save order to database
-	err = app.DB.CreateOrder(&order)
+	orderID, err := app.DB.CreateOrder(payload)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
@@ -269,6 +272,9 @@ func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) 
 	resp := JSONResponse {
 		Error: false,
 		Message: "Order has been created",
+		Data: map[string]string{
+			"order_id": orderID,
+		},
 	}
 	app.writeJSON(res, http.StatusCreated, resp)
 }
