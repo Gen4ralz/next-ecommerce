@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -175,24 +176,47 @@ func (m *MongoDBRepo) CreateOrder(order models.Order) (string, error) {
 	// var newID string
 	collection := m.DB.Collection("orders")
 	_, err := collection.InsertOne(ctx, bson.M{
-		"_id":			 order.ID,
-		"user_id":       order.UserID,
-		"order_items":   order.OrderItems,
-		"shipping":      order.ShippingAddress,
-		"payment":       order.PaymentMethod,
-		"items_price":   order.ItemsPrice,
-		"shipping_fee":  order.ShippingFee,
-		"total_price":   order.TotalPrice,
-		"is_paid":       order.IsPaid,
-		"paid_at":       order.PaidAt,
-		"is_delivered":  order.IsDelivered,
-		"delivered_at":  order.DeliveredAt,
-		"created_at":    order.CreatedAt,
-		"updated_at":    order.UpdatedAt,
+		"_id":			 		order.ID,
+		"user_id":       		order.UserID,
+		"order_items":   		order.OrderItems,
+		"shipping_address":     order.ShippingAddress,
+		"paymentMethod":       	order.PaymentMethod,
+		"itemsPrice":   		order.ItemsPrice,
+		"shippingFee":  		order.ShippingFee,
+		"totalPrice":   		order.TotalPrice,
+		"is_paid":       		order.IsPaid,
+		"paid_at":       		order.PaidAt,
+		"is_delivered":  		order.IsDelivered,
+		"delivered_at":  		order.DeliveredAt,
+		"created_at":    		order.CreatedAt,
+		"updated_at":    		order.UpdatedAt,
 	})
 	if err != nil {
 		return "",err
 	}
 
 	return order.ID.Hex(), nil
+}
+
+func (m *MongoDBRepo) GetOrderByID(id string) (*models.Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+    return nil, fmt.Errorf("invalid order id: %s", id)
+	}
+
+	var order models.Order
+
+	collection := m.DB.Client().Database("next-ecommerce").Collection("orders")
+	err = collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&order)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("order not found for id %s", id)
+		}
+		return nil, err
+	}
+
+	return &order, nil
 }

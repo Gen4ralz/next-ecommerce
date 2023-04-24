@@ -17,4 +17,5 @@ type DatabaseRepo interface {
 	DeleteAllUsers()(error)
 	GetUserByID(id string)(*models.User, error)
 	CreateOrder(order models.Order) (string, error)
+	GetOrderByID(id string) (*models.Order,error)
 }

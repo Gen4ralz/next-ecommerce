@@ -1,54 +1,54 @@
-import React, { useContext, useEffect, useState } from 'react'
-import Layout from '../components/Layout'
-import CheckoutWizard from '../components/CheckoutWizard'
-import { Store } from '../utils/Store'
+import React, { useContext, useEffect, useReducer } from 'react'
+import Layout from '../../components/Layout'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { toast } from 'react-toastify'
-import { getError } from '../utils/error'
 import dynamic from 'next/dynamic'
+import { Store } from '../../utils/Store'
+import { getError } from '../../utils/error'
 
-function PlaceOrderScreen() {
-  const { state, dispatch } = useContext(Store)
-  const { userInfo, cart } = state
-  const { cartItems, shippingAddress, paymentMethod } = cart
+function reducer(state, action) {
+  switch (action.type) {
+    case 'FETCH_REQUEST':
+      return { ...state, loading: true, error: '' }
+    case 'FETCH_SUCCESS':
+      return { ...state, loading: false, order: action.payload, error: '' }
+    case 'FETCH_FAIL':
+      return { ...state, loading: false, error: action.payload }
+    default:
+      state
+  }
+}
+
+function OrderScreen({ params }) {
+  const orderId = params.id
+  const { state } = useContext(Store)
+  const { userInfo } = state
   const router = useRouter()
 
-  const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100
+  const [{ loading, error, order }, dispatch] = useReducer(reducer, {
+    loading: true,
+    order: {},
+    error: '',
+  })
 
-  const itemsPrice = round2(
-    cartItems.reduce((a, c) => a + c.quantity * c.price, 0)
-  )
-
-  const shippingFee = 0
-
-  const totalPrice = itemsPrice + shippingFee
+  const {
+    shipping_address,
+    paymentMethod,
+    order_items,
+    itemsPrice,
+    shippingFee,
+    totalPrice,
+    isPaid,
+    paidAt,
+    isDelivered,
+    deliveredAt,
+  } = order
 
   useEffect(() => {
-    if (!paymentMethod) {
-      router.push('/payment')
+    if (!userInfo) {
+      return router.push('/login')
     }
-    if (cartItems.length === 0) {
-      router.push('/cart')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const [loading, setLoading] = useState(false)
-
-  const placeOrderHandler = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    let payload = {
-      order_items: cartItems,
-      shipping_address: shippingAddress,
-      paymentMethod: paymentMethod,
-      itemsPrice: itemsPrice,
-      shippingFee: shippingFee,
-      totalPrice: totalPrice,
-    }
-
     const headers = new Headers()
     headers.append('Content-Type', 'application/json')
     headers.append(
@@ -57,60 +57,48 @@ function PlaceOrderScreen() {
     )
 
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers: headers,
       credentials: 'include',
-      body: JSON.stringify(payload),
-    }
-    try {
-      const response = await fetch(
-        'http://localhost:8080/api/orders',
-        requestOptions
-      )
-      const data = await response.json()
-      console.log(data)
-      if (data.error) {
-        toast.error(data.message)
-      } else {
-        dispatch({ type: 'CART_CLEAR_ITEMS' })
-        localStorage.setItem('cart', JSON.stringify({ ...cart, cartItems: [] }))
-        router.push(`/order/${data.data.order_id}`)
-      }
-    } catch (error) {
-      toast.error(getError(error))
     }
 
-    // fetch(`http://localhost:8080/api/orders`, requestOptions)
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     if (data.error) {
-    //       setLoading(false)
-    //       console.log(data.message)
-    //       toast.error(data.message)
-    //     } else {
-    //       dispatch({ type: 'CART_CLEAR_ITEMS' })
-    //       localStorage.setItem(
-    //         'cart',
-    //         JSON.stringify({ ...cart, cartItems: [] })
-    //       )
-    //       setLoading(false)
-    //       router.push(`/order/${data.data.order_id}`)
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     // handle network error
-    //     setLoading(false)
-    //     toast.error(getError(error))
-    //   })
-  }
+    const fetchOrder = async () => {
+      try {
+        dispatch({ type: 'FETCH_REQUEST' })
+        const response = await fetch(
+          `http://localhost:8080/api/orders/${orderId}`,
+          requestOptions
+        )
+        const data = await response.json()
+        dispatch({ type: 'FETCH_SUCCESS', payload: data })
+        console.log(data)
+      } catch (err) {
+        dispatch({ type: 'FETCH_FAIL', payload: getError(err) })
+        console.log(err)
+      }
+    }
+    if (!order.id || (order.id && order.id !== orderId)) {
+      fetchOrder()
+      //   if (successPay) {
+      //     dispatch({ type: 'PAY_RESET' })
+      //   }
+      //   if (successDeliver) {
+      //     dispatch({ type: 'DELIVER_RESET' })
+      //   }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order])
 
   return (
-    <Layout title="Place Order">
-      <CheckoutWizard activeStep={3} />
-      {cartItems.length === 0 ? (
-        <div>
-          Cart is empty. <Link href="/">Go shopping</Link>
-        </div>
+    <Layout title={`Order ${orderId}`}>
+      <div className="flex justify-between mx-2 py-4">
+        <h1 className="font-bold text-gray-700">Order:</h1>
+        <span className="font-bold text-gray-700">{orderId}</span>
+      </div>
+      {loading ? (
+        <div>Loading...</div>
+      ) : error ? (
+        <div className="alert-error">{error}</div>
       ) : (
         <>
           <div className="grid md:grid-cols-4 md:gap-5">
@@ -118,17 +106,19 @@ function PlaceOrderScreen() {
               <div className="card border border-gray-200 p-5 shadow-md">
                 <p className="mb-2 font-bold text-gray-700">Shipping Address</p>
                 <div className="ml-4 font-sm text-gray-500">
-                  <div>{shippingAddress.fullName}</div>
-                  <div>{shippingAddress.address}</div>
-                  <div>{shippingAddress.postalCode}</div>
+                  <div>{shipping_address.fullName}</div>
+                  <div>{shipping_address.address}</div>
+                  <div>{shipping_address.postalCode}</div>
                   <div className="flex justify-between">
-                    {shippingAddress.phone}{' '}
+                    {shipping_address.phone}{' '}
                     <span>
-                      <Link
-                        href="/shipping"
-                        className="text-indigo-700 font-bold">
-                        Edit
-                      </Link>
+                      {isDelivered ? (
+                        <div className="text-green-600">
+                          Delivered at {deliveredAt}
+                        </div>
+                      ) : (
+                        <div className="text-red-600">Not delivered</div>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -138,15 +128,17 @@ function PlaceOrderScreen() {
                 <div className="flex justify-between ml-4 font-sm text-gray-500">
                   {paymentMethod}
                   <span>
-                    <Link href="/payment" className="text-indigo-700 font-bold">
-                      Edit
-                    </Link>
+                    {isPaid ? (
+                      <div className="text-green-600">Paid at {paidAt}</div>
+                    ) : (
+                      <div className="text-red-600">Not paid</div>
+                    )}
                   </span>
                 </div>
               </div>
-              <div className="card overflow-x-auto p-5">
+              <div className="card border border-gray-200 p-5 shadow-md">
                 <h2 className="mb-2 font-bold text-gray-700">Order Items</h2>
-                {cartItems.map((item) => (
+                {order_items.map((item) => (
                   <li key={item.sku} className="flex py-3">
                     <div className="w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                       <Link href={`/product/${item.slug}`}>
@@ -176,12 +168,12 @@ function PlaceOrderScreen() {
                     </div>
                   </li>
                 ))}
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <div></div>
                   <Link href="/cart" className="text-indigo-700 font-bold">
                     Edit
                   </Link>
-                </div>
+                </div> */}
               </div>
             </div>
             <div>
@@ -208,14 +200,6 @@ function PlaceOrderScreen() {
                       <div>{totalPrice} ฿</div>
                     </div>
                   </li>
-                  <li>
-                    <button
-                      disabled={loading}
-                      onClick={placeOrderHandler}
-                      className="primary-button w-full">
-                      {loading ? 'Loading...' : 'Place Order'}
-                    </button>
-                  </li>
                 </ul>
               </div>
             </div>
@@ -226,4 +210,8 @@ function PlaceOrderScreen() {
   )
 }
 
-export default dynamic(() => Promise.resolve(PlaceOrderScreen), { ssr: false })
+export async function getServerSideProps({ params }) {
+  return { props: { params } }
+}
+
+export default dynamic(() => Promise.resolve(OrderScreen), { ssr: false })

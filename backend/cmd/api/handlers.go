@@ -278,3 +278,18 @@ func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) 
 	}
 	app.writeJSON(res, http.StatusCreated, resp)
 }
+
+func (app *application) OrderByID(res http.ResponseWriter, req *http.Request) {
+    // Get the slug from the request URL
+    id := chi.URLParam(req, "id")
+	log.Println(id)
+
+	order, err := app.DB.GetOrderByID(id)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+	log.Println(order)
+    
+   _ = app.writeJSON(res, http.StatusOK, order)
+}

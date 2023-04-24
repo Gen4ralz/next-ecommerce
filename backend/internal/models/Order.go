@@ -9,7 +9,7 @@ import (
 type Order struct {
 	ID        		primitive.ObjectID 	`bson:"_id,omitempty" json:"id,omitempty"`				
 	UserID			string			`json:"user_id" bson:"user_id"`
-    OrderItems  	[]OrderItems	`json:"orderItems" bson:"orderItems"`
+    OrderItems  	[]OrderItems	`json:"order_items" bson:"order_items"`
 	ShippingAddress	ShippingAddress	`json:"shipping_address" bson:"shipping_address"`
 	PaymentMethod	string			`json:"paymentMethod" bson:"paymentMethod"`
 	ItemsPrice		int				`json:"itemsPrice" bson:"itemsPrice"`
@@ -19,8 +19,8 @@ type Order struct {
 	IsDelivered		bool			`json:"is_delivered" bson:"is_delivered"`
 	PaidAt			time.Time		`json:"paid_at,omitempty" bson:"paid_at,omitempty"`
 	DeliveredAt		time.Time		`json:"delivered_at,omitempty" bson:"delivered_at,omitempty"`
-	CreatedAt		time.Time		`json:"created_at" bson:"_"`
-	UpdatedAt		time.Time		`json:"updated_at" bson:"_"` 
+	CreatedAt		time.Time		`json:"created_at" bson:"created_at"`
+	UpdatedAt		time.Time		`json:"updated_at" bson:"updated_at"` 
 }
 
 type ShippingAddress struct {

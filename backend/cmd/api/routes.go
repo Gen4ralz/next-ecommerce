@@ -35,6 +35,7 @@ func (app *application) routes() http.Handler {
 		mux.Use(app.authRequired)
 
 		mux.Post("/orders", app.CreateOrder)
+		mux.Get("/orders/{id}", app.OrderByID)
 	})
 
 	return mux
