@@ -52,8 +52,10 @@ export default function LoginScreen() {
           toast.error(data.message)
         } else {
           // handle success
-          dispatch({ type: 'USER_LOGIN', payload: data })
-          Cookies.set('userInfo', JSON.stringify(data))
+          console.log(data)
+          toast.success(data.message)
+          dispatch({ type: 'USER_LOGIN', payload: data.data })
+          Cookies.set('userInfo', JSON.stringify(data.data))
           router.push(redirect || '/')
         }
       })
@@ -115,7 +117,9 @@ export default function LoginScreen() {
         </div>
         <div className="mb-4">
           Don&apos;t have an account? &nbsp;
-          <Link href="register" className="text-rose-500 font-bold">
+          <Link
+            href={`/register?redirect=${redirect || '/'}`}
+            className="text-rose-500 font-bold">
             Register
           </Link>
         </div>

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -211,15 +213,20 @@ func (app *application) authenticate(res http.ResponseWriter, req *http.Request)
 
 	log.Println(tokens.Token)
 
-	// Set the response payload
-		responsePayload := map[string]interface{}{
-			"name": 	user.FirstName,
-			"email":    user.Email,
-			"tokens":   tokens,
-			"isAdmin":  user.IsAdmin,
-			"_id":		user.ID,
-		}
-		app.writeJSON(res, http.StatusAccepted, responsePayload)
+	// Return success response
+	resp := JSONResponse {
+		Error: false,
+		Message: "Login successfully!",
+		Data: map[string]interface{}{
+			"user_id": user.ID,
+			"email": user.Email,
+			"name": user.FirstName,
+			"tokens": tokens,
+			"isAdmin": user.IsAdmin,
+			},
+	}
+
+	app.writeJSON(res, http.StatusAccepted, resp)
 }
 
 func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) {
@@ -264,8 +271,7 @@ func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) 
 	// Save order to database
 	orderID, err := app.DB.CreateOrder(payload)
 	if err != nil {
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-		return
+		app.errorJSON(res, err, http.StatusInternalServerError)
 	}
 
 	// Return success response
@@ -292,4 +298,83 @@ func (app *application) OrderByID(res http.ResponseWriter, req *http.Request) {
 	log.Println(order)
     
    _ = app.writeJSON(res, http.StatusOK, order)
+}
+
+func (app *application) Signup(res http.ResponseWriter, req *http.Request) {
+		if (req.Method != "POST") {
+			return
+		}
+		// read json payload
+		var requestPayload struct {
+			Name string		`json:"name" bson:"name"`
+			Email string	`json:"email" bson:"email"`
+			Password string	`json:"password" bson:"password"`
+		}
+	
+		err := app.readJSON(res, req, &requestPayload)
+		if err != nil {
+			app.errorJSON(res, err, http.StatusBadRequest)
+			return
+		}
+
+		if requestPayload.Name == "" || requestPayload.Email == "" || !strings.Contains(requestPayload.Email, "@") || requestPayload.Password == "" || len(strings.TrimSpace(requestPayload.Password)) < 5 {
+			app.errorJSON(res, errors.New("validation error"), http.StatusUnprocessableEntity)
+			return
+		}
+
+		existsUser, err := app.DB.CheckExistsEmail(requestPayload.Email)
+		if err != nil {
+			app.errorJSON(res, err, http.StatusInternalServerError)
+			return
+		}
+
+		if existsUser {
+			app.errorJSON(res, errors.New("user exists already"), http.StatusUnprocessableEntity)
+			return
+		}
+
+		hasedPassword, _ := bcrypt.GenerateFromPassword([]byte(requestPayload.Password), 12)
+
+		passwordString := string(hasedPassword)
+
+		userPayload := models.User{
+			IsAdmin: false,
+			Email: requestPayload.Email,
+			Password: passwordString,
+			FirstName: requestPayload.Name,
+			LastName: "",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+
+		err = app.DB.InserOneUser(userPayload)
+		if err != nil {
+			app.errorJSON(res, err)
+			return
+		}
+
+		user, err := app.DB.GetUserByEmail(requestPayload.Email)
+		if err != nil {
+			app.errorJSON(res, err)
+			return
+		}
+
+		// Convert ObjectID to string
+		userID := user.ID.Hex()
+
+		// Convert bool to string
+		isAdmin := strconv.FormatBool(user.IsAdmin)
+
+		// Return success response
+		resp := JSONResponse {
+		Error: false,
+		Message: "User created successfully!",
+		Data: map[string]interface{}{
+			"_id": userID,
+			"email": user.Email,
+			"name": user.FirstName,
+			"isAdmin": isAdmin,
+		},
+	}
+		_ = app.writeJSON(res, http.StatusCreated, resp)
 }

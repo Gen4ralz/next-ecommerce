@@ -24,6 +24,7 @@ func (app *application) routes() http.Handler {
 	mux.Get("/", app.Home)
 
 	mux.Post("/authenticate", app.authenticate)
+	mux.Post("/users/signup", app.Signup)
 	
 
 	mux.Get("/products", app.AllProducts)

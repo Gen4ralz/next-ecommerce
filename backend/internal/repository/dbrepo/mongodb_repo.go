@@ -176,20 +176,20 @@ func (m *MongoDBRepo) CreateOrder(order models.Order) (string, error) {
 	// var newID string
 	collection := m.DB.Collection("orders")
 	_, err := collection.InsertOne(ctx, bson.M{
-		"_id":			 		order.ID,
-		"user_id":       		order.UserID,
-		"order_items":   		order.OrderItems,
-		"shipping_address":     order.ShippingAddress,
-		"paymentMethod":       	order.PaymentMethod,
-		"itemsPrice":   		order.ItemsPrice,
-		"shippingFee":  		order.ShippingFee,
-		"totalPrice":   		order.TotalPrice,
-		"is_paid":       		order.IsPaid,
-		"paid_at":       		order.PaidAt,
-		"is_delivered":  		order.IsDelivered,
-		"delivered_at":  		order.DeliveredAt,
-		"created_at":    		order.CreatedAt,
-		"updated_at":    		order.UpdatedAt,
+		"_id": order.ID,
+		"user_id": order.UserID,
+		"order_items": order.OrderItems,
+		"shipping_address": order.ShippingAddress,
+		"paymentMethod": order.PaymentMethod,
+		"itemsPrice": order.ItemsPrice,
+		"shippingFee": order.ShippingFee,
+		"totalPrice": order.TotalPrice,
+		"is_paid": order.IsPaid,
+		"paid_at": order.PaidAt,
+		"is_delivered": order.IsDelivered,
+		"delivered_at": order.DeliveredAt,
+		"created_at": order.CreatedAt,
+		"updated_at": order.UpdatedAt,
 	})
 	if err != nil {
 		return "",err
@@ -219,4 +219,39 @@ func (m *MongoDBRepo) GetOrderByID(id string) (*models.Order, error) {
 	}
 
 	return &order, nil
+}
+
+func (m *MongoDBRepo) CheckExistsEmail(email string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	var user models.User
+
+	collection := m.DB.Client().Database("next-ecommerce").Collection("users")
+
+	// Search for user with the given email address
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	if err != nil {
+        if err == mongo.ErrNoDocuments {
+            // No user found with the given email
+            return false, nil
+        }
+        // Other error occurred
+        return false, err
+    }
+	return true, nil
+}
+
+func (m *MongoDBRepo) InserOneUser(userPayload models.User) (error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	collection := m.DB.Collection("users")
+
+	_, err := collection.InsertOne(ctx, userPayload)
+
+		if err != nil {
+			return  err
+		}
+	return nil
 }

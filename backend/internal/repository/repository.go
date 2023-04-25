@@ -18,4 +18,6 @@ type DatabaseRepo interface {
 	GetUserByID(id string)(*models.User, error)
 	CreateOrder(order models.Order) (string, error)
 	GetOrderByID(id string) (*models.Order,error)
+	CheckExistsEmail(email string) (bool, error)
+	InserOneUser(userPayload models.User) (error)
 }
