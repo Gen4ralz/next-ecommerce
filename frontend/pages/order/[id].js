@@ -6,6 +6,8 @@ import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { Store } from '../../utils/Store'
 import { getError } from '../../utils/error'
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js'
+import { toast } from 'react-toastify'
 
 function reducer(state, action) {
   switch (action.type) {
@@ -15,22 +17,32 @@ function reducer(state, action) {
       return { ...state, loading: false, order: action.payload, error: '' }
     case 'FETCH_FAIL':
       return { ...state, loading: false, error: action.payload }
+    case 'PAY_REQUEST':
+      return { ...state, loadingPay: true }
+    case 'PAY_SUCCESS':
+      return { ...state, loadingPay: false, successPay: true }
+    case 'PAY_FAIL':
+      return { ...state, loadingPay: false, errorPay: action.payload }
+    case 'PAY_RESET':
+      return { ...state, loadingPay: false, successPay: false, errorPay: '' }
     default:
       state
   }
 }
 
 function OrderScreen({ params }) {
+  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer()
   const orderId = params.id
   const { state } = useContext(Store)
   const { userInfo } = state
   const router = useRouter()
 
-  const [{ loading, error, order }, dispatch] = useReducer(reducer, {
-    loading: true,
-    order: {},
-    error: '',
-  })
+  const [{ loading, error, order, successPay, loadingPay }, dispatch] =
+    useReducer(reducer, {
+      loading: true,
+      order: {},
+      error: '',
+    })
 
   const {
     shipping_address,
@@ -77,17 +89,78 @@ function OrderScreen({ params }) {
         console.log(err)
       }
     }
-    if (!order.id || (order.id && order.id !== orderId)) {
+    if (!order.id || successPay || (order.id && order.id !== orderId)) {
       fetchOrder()
-      //   if (successPay) {
-      //     dispatch({ type: 'PAY_RESET' })
-      //   }
+      if (successPay) {
+        dispatch({ type: 'PAY_RESET' })
+      }
       //   if (successDeliver) {
       //     dispatch({ type: 'DELIVER_RESET' })
       //   }
+    } else {
+      const loadPaypalScript = async () => {
+        const headers = new Headers()
+        headers.append('Content-Type', 'application/json')
+        headers.append(
+          'Authorization',
+          'Bearer ' + `${userInfo.tokens.access_token}`
+        )
+
+        const requestOptions = {
+          method: 'GET',
+          headers: headers,
+          credentials: 'include',
+        }
+        const { response } = await fetch(
+          `http://localhost:8080/api/keys/paypal`,
+          requestOptions
+        )
+        const { data } = await response.json()
+        paypalDispatch({
+          type: 'resetOptions',
+          value: { 'client-id': data.data, currency: 'THB' },
+        })
+        paypalDispatch({ type: 'setLoadingStatus', value: 'pending' })
+      }
+      loadPaypalScript()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order])
+  }, [order, orderId, paypalDispatch, router, successPay, userInfo])
+
+  function createOrder(data, actions) {
+    return actions.order
+      .create({
+        purchase_units: [
+          {
+            amount: { value: totalPrice },
+          },
+        ],
+      })
+      .then((orderID) => {
+        return orderID
+      })
+  }
+
+  function onApprove(data, actions) {
+    return actions.order.capture().then(async function (details) {
+      try {
+        dispatch({ type: 'PAY_REQUEST' })
+        const { response } = await fetch(
+          `http://localhost:8080/api/orders/${order._id}/pay`,
+          details
+        )
+        const { data } = await response.json()
+        dispatch({ type: 'PAY_SUCCESS', payload: data.data })
+        toast.success('Order is paid successfully')
+      } catch (err) {
+        dispatch({ type: 'PAY_FAIL', payload: getError(err) })
+        toast.error(getError(err))
+      }
+    })
+  }
+
+  function onError(err) {
+    toast.error(getError(err))
+  }
 
   return (
     <Layout title={`Order ${orderId}`}>
@@ -168,12 +241,6 @@ function OrderScreen({ params }) {
                     </div>
                   </li>
                 ))}
-                {/* <div className="flex justify-between">
-                  <div></div>
-                  <Link href="/cart" className="text-indigo-700 font-bold">
-                    Edit
-                  </Link>
-                </div> */}
               </div>
             </div>
             <div>
@@ -200,6 +267,21 @@ function OrderScreen({ params }) {
                       <div>{totalPrice} ฿</div>
                     </div>
                   </li>
+                  {!isPaid && (
+                    <li>
+                      {isPending ? (
+                        <div>Loading...</div>
+                      ) : (
+                        <div className="w-full">
+                          <PayPalButtons
+                            createOrder={createOrder}
+                            onApprove={onApprove}
+                            onError={onError}></PayPalButtons>
+                        </div>
+                      )}
+                      {loadingPay && <div>Loading...</div>}
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>

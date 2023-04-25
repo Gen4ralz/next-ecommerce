@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -359,21 +358,15 @@ func (app *application) Signup(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// Convert ObjectID to string
-		userID := user.ID.Hex()
-
-		// Convert bool to string
-		isAdmin := strconv.FormatBool(user.IsAdmin)
-
 		// Return success response
 		resp := JSONResponse {
 		Error: false,
 		Message: "User created successfully!",
 		Data: map[string]interface{}{
-			"_id": userID,
+			"user_id": user.ID,
 			"email": user.Email,
 			"name": user.FirstName,
-			"isAdmin": isAdmin,
+			"isAdmin": user.IsAdmin,
 		},
 	}
 		_ = app.writeJSON(res, http.StatusCreated, resp)
