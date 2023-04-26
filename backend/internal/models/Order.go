@@ -12,13 +12,14 @@ type Order struct {
     OrderItems  	[]OrderItems	`json:"order_items" bson:"order_items"`
 	ShippingAddress	ShippingAddress	`json:"shipping_address" bson:"shipping_address"`
 	PaymentMethod	string			`json:"paymentMethod" bson:"paymentMethod"`
+	PaymentResult	PaymentResult	`json:"paymentResult" bson:"paymentResult"`
 	ItemsPrice		int				`json:"itemsPrice" bson:"itemsPrice"`
 	ShippingFee		int				`json:"shippingFee" bson:"shippingFee"`
 	TotalPrice		int				`json:"totalPrice" bson:"totalPrice"`
-	IsPaid			bool			`json:"is_paid" bson:"is_paid"`
-	IsDelivered		bool			`json:"is_delivered" bson:"is_delivered"`
-	PaidAt			time.Time		`json:"paid_at,omitempty" bson:"paid_at,omitempty"`
-	DeliveredAt		time.Time		`json:"delivered_at,omitempty" bson:"delivered_at,omitempty"`
+	IsPaid			bool			`json:"isPaid" bson:"isPaid"`
+	IsDelivered		bool			`json:"isDelivered" bson:"isDelivered"`
+	PaidAt			time.Time		`json:"paidAt,omitempty" bson:"paidAt,omitempty"`
+	DeliveredAt		time.Time		`json:"deliveredAt,omitempty" bson:"deliveredAt,omitempty"`
 	CreatedAt		time.Time		`json:"created_at" bson:"created_at"`
 	UpdatedAt		time.Time		`json:"updated_at" bson:"updated_at"` 
 }
@@ -43,4 +44,11 @@ type OrderItems struct {
     Category    string      `json:"category" bson:"category"`
 	Stock		int			`json:"stock" bson:"stock"`
 	Brand		string		`json:"brand" bson:"brand"`
+}
+
+type PaymentResult struct {
+	ID			string		`json:"id" bson:"id"`
+	Status		string		`json:"status" bson:"status"`
+	Email		string		`json:"email_address" bson:"email_address"`
+	Intent      string 		`json:"intent" bson:"intent"`
 }

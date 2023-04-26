@@ -82,8 +82,8 @@ function OrderScreen({ params }) {
           requestOptions
         )
         const data = await response.json()
-        dispatch({ type: 'FETCH_SUCCESS', payload: data })
-        console.log(data)
+        dispatch({ type: 'FETCH_SUCCESS', payload: data.data })
+        console.log(data.data)
       } catch (err) {
         dispatch({ type: 'FETCH_FAIL', payload: getError(err) })
         console.log(err)
@@ -111,11 +111,12 @@ function OrderScreen({ params }) {
           headers: headers,
           credentials: 'include',
         }
-        const { response } = await fetch(
+        const response = await fetch(
           `http://localhost:8080/api/keys/paypal`,
           requestOptions
         )
-        const { data } = await response.json()
+        const data = await response.json()
+        console.log(data.data)
         paypalDispatch({
           type: 'resetOptions',
           value: { 'client-id': data.data, currency: 'THB' },
@@ -144,11 +145,35 @@ function OrderScreen({ params }) {
     return actions.order.capture().then(async function (details) {
       try {
         dispatch({ type: 'PAY_REQUEST' })
-        const { response } = await fetch(
-          `http://localhost:8080/api/orders/${order._id}/pay`,
-          details
+        const headers = new Headers()
+        headers.append('Content-Type', 'application/json')
+        headers.append(
+          'Authorization',
+          'Bearer ' + `${userInfo.tokens.access_token}`
         )
-        const { data } = await response.json()
+
+        console.log(details)
+
+        const payload = {
+          id: details.id,
+          status: details.status,
+          email_address: details.payer.email_address,
+          intent: details.intent,
+        }
+
+        const requestOptions = {
+          method: 'PUT',
+          headers: headers,
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        }
+        console.log(requestOptions.body)
+        const response = await fetch(
+          `http://localhost:8080/api/orders/${orderId}/pay`,
+          requestOptions
+        )
+        const data = await response.json()
+        console.log(data.data)
         dispatch({ type: 'PAY_SUCCESS', payload: data.data })
         toast.success('Order is paid successfully')
       } catch (err) {

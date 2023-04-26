@@ -24,6 +24,14 @@ type application struct {
 	JWTIssuer 		string
 	JWTAudience 	string
 	CookieDomain	string
+	Paypal			struct {
+		secret	string
+		keys	string
+	}
+	Stripe			struct {
+		secret	string
+		keys	string
+	}
 }
 
 func main() {
@@ -42,6 +50,7 @@ func main() {
 	app.JWTAudience = os.Getenv("JWT_AUDIENCE")
 	app.CookieDomain = os.Getenv("COOKIE_DOMAIN")
 	app.Domain = os.Getenv("DOMAIN")
+	app.Paypal.keys = os.Getenv("PAYPAL_CLIENT_ID")
 
 	// connect to the database
 	conn, err := app.connectToDB()
@@ -59,7 +68,7 @@ func main() {
 		Issuer: app.JWTIssuer,
 		Audience: app.JWTAudience,
 		Secret: app.JWTSecret,
-		TokenExpiry: time.Minute * 10,
+		TokenExpiry: time.Minute * 60,
 		CookiePath: "/",
 		CookieName: "refresh-token",
 		CookieDomain: app.CookieDomain,

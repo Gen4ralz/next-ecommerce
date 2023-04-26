@@ -248,7 +248,6 @@ func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) 
 		app.errorJSON(res, err)
 		return
 	}
-	log.Println(userEmail)
 
 	user, err := app.DB.GetUserByEmail(userEmail)
 	if err != nil {
@@ -261,11 +260,8 @@ func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) 
 	payload.UserID = user.ID.Hex()
 	payload.IsDelivered = false
 	payload.IsPaid = false
-	payload.CreatedAt = time.Now()
-	payload.UpdatedAt = time.Now()
-
-	log.Println(payload)
-
+	payload.CreatedAt = time.Now().UTC().Add(7 * time.Hour)
+	payload.UpdatedAt = time.Now().UTC().Add(7 * time.Hour)
 
 	// Save order to database
 	orderID, err := app.DB.CreateOrder(payload)
@@ -285,18 +281,35 @@ func (app *application) CreateOrder(res http.ResponseWriter, req *http.Request) 
 }
 
 func (app *application) OrderByID(res http.ResponseWriter, req *http.Request) {
-    // Get the slug from the request URL
+    // Get the id from the request URL
     id := chi.URLParam(req, "id")
-	log.Println(id)
 
 	order, err := app.DB.GetOrderByID(id)
 	if err != nil {
 		app.errorJSON(res, err)
 		return
 	}
-	log.Println(order)
-    
-   _ = app.writeJSON(res, http.StatusOK, order)
+    // Return success response
+	 resp := JSONResponse {
+		Error: false,
+		Message: "",
+		Data: map[string]interface{}{
+			"id": order.ID,
+			"user_id": order.UserID,
+			"order_items": order.OrderItems,
+			"shipping_address": order.ShippingAddress,
+			"paymentMethod": order.PaymentMethod,
+			"paymentResult": order.PaymentResult,
+			"itemsPrice": order.ItemsPrice,
+			"shippingFee": order.ShippingFee,
+			"totalPrice": order.TotalPrice,
+			"isPaid": order.IsPaid,
+			"isDelivered": order.IsDelivered,
+			"paidAt": order.PaidAt.Format("02-01-2006 | 15:04:05"),
+			"deliveredAt": order.DeliveredAt,
+   		},
+	}
+		_ = app.writeJSON(res, http.StatusOK, resp)
 }
 
 func (app *application) Signup(res http.ResponseWriter, req *http.Request) {
@@ -342,8 +355,8 @@ func (app *application) Signup(res http.ResponseWriter, req *http.Request) {
 			Password: passwordString,
 			FirstName: requestPayload.Name,
 			LastName: "",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: time.Now().UTC().Add(7 * time.Hour),
+			UpdatedAt: time.Now().UTC().Add(7 * time.Hour),
 		}
 
 		err = app.DB.InserOneUser(userPayload)
@@ -370,4 +383,100 @@ func (app *application) Signup(res http.ResponseWriter, req *http.Request) {
 		},
 	}
 		_ = app.writeJSON(res, http.StatusCreated, resp)
+}
+
+func (app *application) GetPayPalKeys(res http.ResponseWriter, req *http.Request) {
+	// Return success response
+	resp := JSONResponse{
+		Error:   false,
+		Message: "PayPalKeys",
+		Data:    app.Paypal.keys,
+	}
+
+	err := app.writeJSON(res, http.StatusOK, resp)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (app *application) PayByPayPal(res http.ResponseWriter, req *http.Request) {
+
+	// read json payload
+	var requestPayload struct {
+		ID 		string	`json:"id" bson:"id"`
+		Status 	string	`json:"status" bson:"status"`
+		Email 	string	`json:"email_address" bson:"email_address"`
+		Intent 	string	`json:"intent" bson:"intent"`
+	}
+
+	err := app.readJSON(res, req, &requestPayload)
+	if err != nil {
+		app.errorJSON(res, err, http.StatusBadRequest)
+		return
+	}
+
+	log.Println(requestPayload)
+
+ // Get the order_id from the request URL
+    orderID := chi.URLParam(req, "id")
+    log.Println(orderID)
+
+    order, err := app.DB.GetOrderByID(orderID)
+    if err != nil {
+     app.errorJSON(res, err)
+     return
+    }
+
+    if order.ID.Hex() != "" {
+     if order.IsPaid {
+         app.errorJSON(res, errors.New("error: order is already paid"), http.StatusBadRequest)
+         return
+     }
+	 order.PaymentResult.Intent = requestPayload.Intent
+     order.IsPaid = true
+     order.PaidAt = time.Now().UTC().Add(7 * time.Hour)
+     order.PaymentResult.ID = requestPayload.ID
+     order.PaymentResult.Status = requestPayload.Status
+     order.PaymentResult.Email = requestPayload.Email
+
+     log.Println(order)
+
+     err := app.DB.UpdateOrder(order)
+     if err != nil {
+         app.errorJSON(res, err)
+         return
+     }
+     paidOrder, err := app.DB.GetOrderByID(orderID)
+     if err != nil {
+         app.errorJSON(res, err)
+         return
+     }
+
+	// Return success response
+	 resp := JSONResponse {
+		 Error: false,
+		 Message: "",
+		 Data: map[string]interface{}{
+			 "id": paidOrder.ID,
+			 "user_id": paidOrder.UserID,
+			 "order_items": paidOrder.OrderItems,
+			 "shipping_address": paidOrder.ShippingAddress,
+			 "paymentMethod": paidOrder.PaymentMethod,
+			 "paymentResult": paidOrder.PaymentResult,
+			 "itemsPrice": paidOrder.ItemsPrice,
+			 "shippingFee": paidOrder.ShippingFee,
+			 "totalPrice": paidOrder.TotalPrice,
+			 "isPaid": paidOrder.IsPaid,
+			 "isDelivered": paidOrder.IsDelivered,
+			 "paidAt": paidOrder.PaidAt.Format("02-01-2006 | 15:04:05"),
+			 "deliveredAt": paidOrder.DeliveredAt,
+	},
+}
+log.Println(resp.Data)
+     _ = app.writeJSON(res, http.StatusOK, resp)
+
+    } else {
+     app.errorJSON(res, errors.New("error: order not found"), http.StatusNotFound)
+         return
+    }
 }

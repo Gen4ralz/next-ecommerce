@@ -184,10 +184,10 @@ func (m *MongoDBRepo) CreateOrder(order models.Order) (string, error) {
 		"itemsPrice": order.ItemsPrice,
 		"shippingFee": order.ShippingFee,
 		"totalPrice": order.TotalPrice,
-		"is_paid": order.IsPaid,
-		"paid_at": order.PaidAt,
-		"is_delivered": order.IsDelivered,
-		"delivered_at": order.DeliveredAt,
+		"isPaid": order.IsPaid,
+		"paidAt": order.PaidAt,
+		"isDelivered": order.IsDelivered,
+		"deliveredAt": order.DeliveredAt,
 		"created_at": order.CreatedAt,
 		"updated_at": order.UpdatedAt,
 	})
@@ -253,5 +253,36 @@ func (m *MongoDBRepo) InserOneUser(userPayload models.User) (error) {
 		if err != nil {
 			return  err
 		}
+	return nil
+}
+
+func (m *MongoDBRepo) UpdateOrder(order *models.Order) (error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	// var newID string
+	collection := m.DB.Collection("orders")
+	filter := bson.M{"_id": order.ID}
+	update := bson.M{"$set": bson.M{
+		"user_id":         order.UserID,
+		"order_items":     order.OrderItems,
+		"shipping_address": order.ShippingAddress,
+		"paymentMethod":    order.PaymentMethod,
+		"paymentResult":    order.PaymentResult,
+		"itemsPrice":       order.ItemsPrice,
+		"shippingFee":      order.ShippingFee,
+		"totalPrice":       order.TotalPrice,
+		"isPaid":          order.IsPaid,
+		"isDelivered":     order.IsDelivered,
+		"paidAt":          order.PaidAt,
+		"deliveredAt":     order.DeliveredAt,
+		"created_at":       order.CreatedAt,
+		"updated_at":       time.Now(),
+	},}
+
+	_, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
 	return nil
 }
