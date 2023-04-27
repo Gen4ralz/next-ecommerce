@@ -59,7 +59,8 @@ function OrderScreen({ params }) {
 
   useEffect(() => {
     if (!userInfo) {
-      return router.push('/login')
+      router.push('/login')
+      return
     }
     const headers = new Headers()
     headers.append('Content-Type', 'application/json')
@@ -78,7 +79,7 @@ function OrderScreen({ params }) {
       try {
         dispatch({ type: 'FETCH_REQUEST' })
         const response = await fetch(
-          `http://localhost:8080/api/orders/${orderId}`,
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/orders/${orderId}`,
           requestOptions
         )
         const data = await response.json()
@@ -112,7 +113,7 @@ function OrderScreen({ params }) {
           credentials: 'include',
         }
         const response = await fetch(
-          `http://localhost:8080/api/keys/paypal`,
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/keys/paypal`,
           requestOptions
         )
         const data = await response.json()
@@ -168,7 +169,7 @@ function OrderScreen({ params }) {
         }
         console.log(requestOptions.body)
         const response = await fetch(
-          `http://localhost:8080/api/orders/${orderId}/pay`,
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/orders/${orderId}/pay`,
           requestOptions
         )
         const data = await response.json()

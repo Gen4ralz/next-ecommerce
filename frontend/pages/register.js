@@ -45,7 +45,7 @@ export default function LoginScreen() {
     }
     try {
       const response = await fetch(
-        'http://localhost:8080/users/signup',
+        `${process.env.NEXT_PUBLIC_BACKEND}/users/signup`,
         requestOptions
       )
       const data = await response.json()

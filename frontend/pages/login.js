@@ -42,7 +42,7 @@ export default function LoginScreen() {
       body: JSON.stringify(payload),
     }
 
-    fetch(`http://localhost:8080/authenticate`, requestOptions)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND}/authenticate`, requestOptions)
       .then((response) => response.json())
 
       .then((data) => {

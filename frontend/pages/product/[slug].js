@@ -391,7 +391,7 @@ export async function getServerSideProps(context) {
   }
 
   const response = await fetch(
-    `http://localhost:8080/products/${slug}`,
+    `${process.env.NEXT_PUBLIC_BACKEND}/products/${slug}`,
     requestOptions
   )
   const data = await response.json().catch((err) => {

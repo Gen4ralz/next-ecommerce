@@ -29,7 +29,8 @@ export default function OrderHistoryScreen() {
   })
   useEffect(() => {
     if (!userInfo) {
-      return router.push('/login')
+      router.push('/login')
+      return
     }
     const headers = new Headers()
     headers.append('Content-Type', 'application/json')
@@ -47,7 +48,7 @@ export default function OrderHistoryScreen() {
       try {
         dispatch({ type: 'FETCH_REQUEST' })
         const response = await fetch(
-          `http://localhost:8080/api/orders/history`,
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/orders/history`,
           requestOptions
         )
         const data = await response.json()

@@ -395,7 +395,8 @@ func (app *application) GetPayPalKeys(res http.ResponseWriter, req *http.Request
 
 	err := app.writeJSON(res, http.StatusOK, resp)
 	if err != nil {
-		log.Println(err)
+		app.errorJSON(res, err)
+		return
 	}
 }
 
@@ -414,8 +415,6 @@ func (app *application) PayByPayPal(res http.ResponseWriter, req *http.Request) 
 		app.errorJSON(res, err, http.StatusBadRequest)
 		return
 	}
-
-	log.Println(requestPayload)
 
  // Get the order_id from the request URL
     orderID := chi.URLParam(req, "id")

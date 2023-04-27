@@ -64,7 +64,7 @@ function PlaceOrderScreen() {
     }
     try {
       const response = await fetch(
-        'http://localhost:8080/api/orders',
+        `${process.env.NEXT_PUBLIC_BACKEND}/api/orders`,
         requestOptions
       )
       const data = await response.json()
@@ -79,29 +79,6 @@ function PlaceOrderScreen() {
     } catch (error) {
       toast.error(getError(error))
     }
-
-    // fetch(`http://localhost:8080/api/orders`, requestOptions)
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     if (data.error) {
-    //       setLoading(false)
-    //       console.log(data.message)
-    //       toast.error(data.message)
-    //     } else {
-    //       dispatch({ type: 'CART_CLEAR_ITEMS' })
-    //       localStorage.setItem(
-    //         'cart',
-    //         JSON.stringify({ ...cart, cartItems: [] })
-    //       )
-    //       setLoading(false)
-    //       router.push(`/order/${data.data.order_id}`)
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     // handle network error
-    //     setLoading(false)
-    //     toast.error(getError(error))
-    //   })
   }
 
   return (

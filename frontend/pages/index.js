@@ -22,7 +22,10 @@ export async function getServerSideProps() {
     headers: headers,
   }
 
-  const response = await fetch(`http://localhost:8080/products`, requestOptions)
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND}/products`,
+    requestOptions
+  )
   const data = await response.json().catch((err) => {
     console.log(err)
   })
