@@ -116,7 +116,6 @@ function OrderScreen({ params }) {
           requestOptions
         )
         const data = await response.json()
-        console.log(data.data)
         paypalDispatch({
           type: 'resetOptions',
           value: { 'client-id': data.data, currency: 'THB' },

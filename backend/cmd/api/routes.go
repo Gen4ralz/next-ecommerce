@@ -40,6 +40,8 @@ func (app *application) routes() http.Handler {
 
 		mux.Get("/keys/paypal", app.GetPayPalKeys)
 		mux.Put("/orders/{id}/pay", app.PayByPayPal)
+
+		mux.Get("/orders/history", app.OrderHistory)
 	})
 
 	return mux

@@ -24,13 +24,13 @@ type application struct {
 	JWTIssuer 		string
 	JWTAudience 	string
 	CookieDomain	string
-	Paypal			struct {
-		secret	string
-		keys	string
+	Paypal	struct {
+		secret		string
+		keys		string
 	}
-	Stripe			struct {
-		secret	string
-		keys	string
+	Stripe	struct {
+		secret		string
+		keys		string
 	}
 }
 

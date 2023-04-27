@@ -47,7 +47,7 @@ function Footer() {
       </Link>
 
       <Link
-        href="/login"
+        href="/login?redirect=profile"
         className={
           (path === '/login'
             ? 'text-sky-700 border-sky-500 bg-sky-50'

@@ -141,3 +141,29 @@ func (j *Auth) SearchUserEmailFromToken(tokenString string) (string, error) {
 
 	return userEmail, nil
 }
+
+func (j *Auth) SearchUserIDFromToken(tokenString string) (string, error) {
+
+	// Parse the token claims to get the user email
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(j.Secret), nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("invalid token claims")
+	}
+
+	userID, ok := claims["sub"].(string)
+	if !ok {
+		return "", errors.New("invalid sub claim")
+	}
+
+	return userID, nil
+}

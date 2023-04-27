@@ -286,3 +286,35 @@ func (m *MongoDBRepo) UpdateOrder(order *models.Order) (error) {
 	}
 	return nil
 }
+
+func (m *MongoDBRepo) GetOrderByUserID(user_id string) ([]*models.Order, error) {
+	var orders []*models.Order
+
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeOut)
+	defer cancel()
+
+	collection := m.DB.Collection("orders")
+
+	filter := bson.M{"user_id": user_id}
+	
+	cur, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		var order models.Order
+		err := cur.Decode(&order)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, &order)
+	}
+
+	if err := cur.Err(); err != nil {
+        return nil, err
+    }
+
+	return orders, nil
+}

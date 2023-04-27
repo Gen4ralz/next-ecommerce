@@ -480,3 +480,32 @@ log.Println(resp.Data)
          return
     }
 }
+
+func (app *application) OrderHistory(res http.ResponseWriter, req *http.Request) {
+
+	tokenString, _, err := app.auth.GetTokenFromHeaderAndVerify(res, req)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+	userID, err := app.auth.SearchUserIDFromToken(tokenString)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+	order, err := app.DB.GetOrderByUserID(userID)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+
+    // Return success response
+	 resp := JSONResponse {
+		Error: false,
+		Message: "",
+		Data: order,
+	}
+		_ = app.writeJSON(res, http.StatusOK, resp)
+}
