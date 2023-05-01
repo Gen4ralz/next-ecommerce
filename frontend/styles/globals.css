@@ -32,3 +32,22 @@ select,
 textarea {
   @apply mb-4 rounded border p-2 outline-none ring-blue-500 focus:ring;
 }
+
+.uploaded-row {
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 5px;
+  background-color: #e9f0ff;
+}
+
+.upload-content {
+  display: flex;
+  align-items: center;
+}
+
+.test {
+  object-fit: contain;
+}

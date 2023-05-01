@@ -400,6 +400,21 @@ func (app *application) GetPayPalKeys(res http.ResponseWriter, req *http.Request
 	}
 }
 
+func (app *application) GetLineLiffKeys(res http.ResponseWriter, req *http.Request) {
+	// Return success response
+	resp := JSONResponse{
+		Error:   false,
+		Message: "LineLiffKeys",
+		Data:    app.LineLiff,
+	}
+	
+	err := app.writeJSON(res, http.StatusOK, resp)
+	if err != nil {
+		app.errorJSON(res, err)
+		return
+	}
+}
+
 func (app *application) PayByPayPal(res http.ResponseWriter, req *http.Request) {
 
 	// read json payload

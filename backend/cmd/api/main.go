@@ -32,6 +32,7 @@ type application struct {
 		secret		string
 		keys		string
 	}
+	LineLiff		string
 }
 
 func main() {
@@ -51,6 +52,7 @@ func main() {
 	app.CookieDomain = os.Getenv("COOKIE_DOMAIN")
 	app.Domain = os.Getenv("DOMAIN")
 	app.Paypal.keys = os.Getenv("PAYPAL_CLIENT_ID")
+	app.LineLiff = os.Getenv("LIFF_ID")
 
 	// connect to the database
 	conn, err := app.connectToDB()

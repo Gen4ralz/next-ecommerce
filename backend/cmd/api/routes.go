@@ -32,6 +32,8 @@ func (app *application) routes() http.Handler {
 	mux.Get("/products/seed", app.SeedProducts)
 	mux.Get("/users/seed", app.SeedUsers)
 
+	mux.Get("/keys/lineliff", app.GetLineLiffKeys)
+
 	mux.Route("/api", func(mux chi.Router) {
 		mux.Use(app.authRequired)
 

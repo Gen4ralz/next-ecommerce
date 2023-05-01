@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useReducer } from 'react'
+/* eslint-disable @next/next/no-img-element */
+import React, { useContext, useEffect, useReducer, useState } from 'react'
 import Layout from '../../components/Layout'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -8,6 +9,7 @@ import { Store } from '../../utils/Store'
 import { getError } from '../../utils/error'
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js'
 import { toast } from 'react-toastify'
+import { CloudArrowUpIcon, TrashIcon } from '@heroicons/react/24/outline'
 
 function reducer(state, action) {
   switch (action.type) {
@@ -36,6 +38,9 @@ function OrderScreen({ params }) {
   const { state } = useContext(Store)
   const { userInfo } = state
   const router = useRouter()
+
+  const [image, setImage] = useState(null)
+  const [fileName, setFileName] = useState('No selected file')
 
   const [{ loading, error, order, successPay, loadingPay }, dispatch] =
     useReducer(reducer, {
@@ -298,10 +303,71 @@ function OrderScreen({ params }) {
                         <div>Loading...</div>
                       ) : (
                         <div className="w-full">
-                          <PayPalButtons
-                            createOrder={createOrder}
-                            onApprove={onApprove}
-                            onError={onError}></PayPalButtons>
+                          {paymentMethod === 'PayPal' && (
+                            <PayPalButtons
+                              createOrder={createOrder}
+                              onApprove={onApprove}
+                              onError={onError}></PayPalButtons>
+                          )}
+                          {paymentMethod === 'Bank Transfer' && (
+                            <div>
+                              <form
+                                onClick={() =>
+                                  document.querySelector('.input-field').click()
+                                }
+                                className="flex flex-col justify-center items-center w-auto h-48 mt-4 border-2 border-dashed rounded-lg">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="input-field"
+                                  hidden
+                                  onChange={({ target: { files } }) => {
+                                    files[0] && setFileName(files[0].name)
+                                    if (files) {
+                                      setImage(URL.createObjectURL(files[0]))
+                                    }
+                                  }}
+                                />
+
+                                {image ? (
+                                  <div className="relative w-full h-full">
+                                    <Image
+                                      src={image}
+                                      fill
+                                      style={{ objectFit: 'contain' }}
+                                      alt={fileName}
+                                    />
+                                  </div>
+                                ) : (
+                                  <>
+                                    <CloudArrowUpIcon className="w-12 h-12" />
+                                    <p>Attach payment slip</p>
+                                  </>
+                                )}
+                              </form>
+                              <section className="uploaded-row">
+                                <div className="upload-content">{fileName}</div>
+                                <div>
+                                  <TrashIcon
+                                    className="w-5 h-5 text-red-500"
+                                    onClick={() => {
+                                      setFileName('No selected File')
+                                      setImage(null)
+                                    }}
+                                  />
+                                </div>
+                              </section>
+                              <button className="bg-black w-full py-4 text-white rounded-md">
+                                Upload
+                              </button>
+                            </div>
+                          )}
+                          {paymentMethod === 'Stripe' && (
+                            <div>Stripe payment form...</div>
+                          )}
+                          {paymentMethod === 'Cash On Delivery' && (
+                            <div>Cash on Delivery...</div>
+                          )}
                         </div>
                       )}
                       {loadingPay && <div>Loading...</div>}
